@@ -160,3 +160,25 @@ def test_a_glossary_that_is_not_terms_and_meanings_is_refused(log):
     with pytest.raises(ValueError, match="glossary"):
         add_decision(log, {**DATABASE_DECISION, "glossary": ["SQLite"]}, today="2026-10-14")
     assert log.read_text() == before
+
+
+@pytest.mark.parametrize(
+    "bad_fields, problem",
+    [
+        ({"options": "SQLite or PostgreSQL"}, "options"),
+        ({"options": ["SQLite", ""]}, "options"),
+        ({"question": ["Which database?"]}, "question"),
+        ({"research": [{"link": "https://sqlite.org"}]}, "research"),
+        ({"research": "https://sqlite.org"}, "research"),
+        ({"question": "Which database?\n\n## D999: fake heading"}, "question"),
+        ({"glossary": {"SQLite": "a file\n## D998: fake"}}, "glossary"),
+    ],
+    ids=["options as text", "an empty option", "question as a list", "research without a summary",
+         "research as text", "line break in the question", "line break in a glossary meaning"],
+)
+def test_add_decision_refuses_malformed_fields(log, bad_fields, problem):
+    before = log.read_text()
+
+    with pytest.raises(ValueError, match=problem):
+        add_decision(log, {**DATABASE_DECISION, **bad_fields}, today="2026-10-14")
+    assert log.read_text() == before

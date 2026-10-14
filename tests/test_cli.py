@@ -111,7 +111,10 @@ def test_stage_approve_and_gate_from_the_command_line(tmp_path):
     assert shown.stdout == "Current stage: PRD review\n"
     assert moved == ["Now at: Ideas\n", "Now at: Spec (needs your approval before moving on)\n"]
     assert (blocked.returncode, blocked.stderr) == (1, "tortoise: Spec needs your approval first: run tortoise approve\n")
-    assert approved.stdout == "approved Spec; committed and tagged tortoise/spec\n"
+    assert approved.stdout == (
+        "approved Spec; committed and tagged tortoise/spec\n"
+        "committed: docs/DECISIONS.md, tortoise.json\n"
+    )
 
     tortoise(tmp_path, "stage", "next")
     tortoise(tmp_path, "approve")
@@ -153,4 +156,5 @@ def test_approve_despite_failing_tests_from_the_command_line(tmp_path):
     assert allowed.stdout == (
         "approved Milestone gate, milestone 1 of 1 despite failing tests (test server down); "
         "committed and tagged tortoise/milestone-1\n"
+        "committed: docs/gates/milestone-1.md, docs/project.html, tortoise.json\n"
     )

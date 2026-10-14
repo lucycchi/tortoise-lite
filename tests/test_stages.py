@@ -1,4 +1,5 @@
 import json
+import re
 import subprocess
 
 import pytest
@@ -198,3 +199,82 @@ def test_an_override_needs_a_reason_and_failing_tests(project):
     run_gate(project)
     with pytest.raises(ValueError, match="tests passed"):
         approve(project, today="2026-10-15", despite_failing_tests="just in case")
+
+
+@pytest.mark.parametrize("name", [".env", ".env.local", "server.pem", "deploy.key", "id_ed25519"])
+def test_approving_refuses_to_commit_a_new_secret_file(project, name):
+    (project / name).write_text("SECRET=1\n")
+    at_gate_with_tests(project, "true")
+
+    with pytest.raises(ValueError, match=re.escape(name)):
+        approve(project, today="2026-10-15")
+    assert "tortoise/milestone-1" not in git(project, "tag")
+    assert [approval["stage"] for approval in state(project)["approvals"]] == ["spec", "architecture", "plan"]
+
+
+def test_example_files_and_secrets_already_committed_are_allowed(project):
+    (project / "settings.key").write_text("old\n")
+    git(project, "add", "settings.key")
+    git(project, "commit", "-q", "-m", "the author committed this on purpose")
+    (project / ".env.example").write_text("SECRET=\n")
+    (project / "settings.key").write_text("changed\n")
+    at_gate_with_tests(project, "true")
+
+    approve(project, today="2026-10-15")
+
+    committed = git(project, "show", "--name-only", "--format=", "tortoise/milestone-1").split("\n")
+    assert ".env.example" in committed and "settings.key" in committed
+
+
+def test_changing_code_after_a_passing_gate_blocks_the_approval(project):
+    at_gate_with_tests(project, "true")
+    (project / "app.py").write_text("print('changed after the gate')\n")
+
+    with pytest.raises(ValueError, match="code has changed since the gate ran"):
+        approve(project, today="2026-10-15")
+    run_gate(project)
+    assert approve(project, today="2026-10-15")["tag"] == "tortoise/milestone-1"
+
+
+def test_recording_reviews_in_docs_after_the_gate_does_not_block_the_approval(project):
+    at_gate_with_tests(project, "true")
+    gate = project / "docs" / "gates" / "milestone-1.md"
+    gate.write_text(gate.read_text().replace("## Reviews\n\nNot recorded yet.", "## Reviews\n\n- No findings."))
+
+    assert approve(project, today="2026-10-15")["tag"] == "tortoise/milestone-1"
+
+
+def test_an_existing_tag_is_refused_before_anything_changes(project):
+    move_to(project, "spec")
+    git(project, "commit", "-q", "--allow-empty", "-m", "someone else's commit")
+    git(project, "tag", "tortoise/spec")
+    head = git(project, "rev-parse", "HEAD")
+
+    with pytest.raises(ValueError, match="tag tortoise/spec already exists"):
+        approve(project, today="2026-10-14")
+    assert git(project, "rev-parse", "HEAD") == head
+    assert state(project)["approvals"] == []
+
+
+def test_a_rejected_commit_leaves_nothing_staged_and_nothing_recorded(project):
+    move_to(project, "spec")
+    (project / "docs" / "SPEC.md").write_text("# Spec\n")
+    hook = project / ".git" / "hooks" / "pre-commit"
+    hook.write_text("#!/bin/sh\necho 'hook says no' >&2\nexit 1\n")
+    hook.chmod(0o755)
+
+    with pytest.raises(ValueError, match="hook says no"):
+        approve(project, today="2026-10-14")
+    assert git(project, "diff", "--cached", "--name-only") == ""
+    assert state(project)["approvals"] == []
+
+
+def test_a_document_approval_leaves_files_the_author_staged_alone(project):
+    move_to(project, "spec")
+    (project / "notes.txt").write_text("my own work in progress\n")
+    git(project, "add", "notes.txt")
+
+    approve(project, today="2026-10-14")
+
+    assert "notes.txt" not in git(project, "show", "--name-only", "--format=", "tortoise/spec")
+    assert git(project, "diff", "--cached", "--name-only") == "notes.txt"

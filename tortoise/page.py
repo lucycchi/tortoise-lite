@@ -14,7 +14,7 @@ from tortoise.project import load_state, write_safely
 from tortoise.stages import describe
 
 KEY_DECISIONS_SHOWN = 5
-MERMAID_URL = "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs"
+MERMAID_URL = "https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs"
 
 
 def build_page(root: Path) -> Path:

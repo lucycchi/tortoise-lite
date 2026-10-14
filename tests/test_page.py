@@ -105,3 +105,11 @@ def test_research_links_are_clickable(project):
     page = build_page(project).read_text()
 
     assert '<a href="https://sqlite.org/whentouse.html">https://sqlite.org/whentouse.html</a>: SQLite suits one server.' in page
+
+
+def test_page_loads_a_mermaid_release_without_the_known_label_injection_flaw():
+    # GHSA-7rqq-prvp-x9jh: Mermaid before 11.10.0 lets a sequence-diagram label run script.
+    from tortoise.page import MERMAID_URL
+
+    version = tuple(int(part) for part in MERMAID_URL.split("mermaid@")[1].split("/")[0].split("."))
+    assert version >= (11, 10, 0)

@@ -15,9 +15,8 @@ def add_decision(log: Path, fields: dict, today: str, replaces: str | None = Non
     missing = [name for name in REQUIRED_FIELDS if not fields.get(name)]
     if missing:
         raise ValueError(f"decision is missing: {', '.join(missing)}")
+    _check_shapes(fields)
     terms = fields.get("glossary") or {}
-    if not isinstance(terms, dict) or not all(isinstance(value, str) for value in terms.values()):
-        raise ValueError("glossary must map each term to its plain-English meaning")
 
     text = log.read_text()
     numbers = [int(found) for found in ENTRY_HEADING.findall(text)]
@@ -44,6 +43,28 @@ def _merge_glossary(existing: str, terms: dict[str, str]) -> str:
         return existing
     lines = [f"- **{term}:** {entries[term]}" for term in sorted(entries, key=str.lower)]
     return "\n" + "\n".join(lines) + "\n"
+
+
+def _check_shapes(fields: dict) -> None:
+    """Refuse fields of the wrong type, or with line breaks that could fake a heading in the log."""
+    def is_line(value) -> bool:
+        return isinstance(value, str) and bool(value.strip()) and "\n" not in value and "\r" not in value
+
+    for name in ("question", "choice", "reason", "proposed_by"):
+        if not is_line(fields[name]):
+            raise ValueError(f"{name} must be one line of text")
+    options = fields["options"]
+    if not isinstance(options, list) or not all(is_line(option) for option in options):
+        raise ValueError("options must be a list of one-line choices")
+    research = fields.get("research") or []
+    if not isinstance(research, list) or not all(
+        isinstance(source, dict) and is_line(source.get("link")) and is_line(source.get("summary"))
+        for source in research
+    ):
+        raise ValueError("research must be a list of sources, each with a one-line link and summary")
+    terms = fields.get("glossary") or {}
+    if not isinstance(terms, dict) or not all(is_line(term) and is_line(meaning) for term, meaning in terms.items()):
+        raise ValueError("glossary must map each term to its one-line plain-English meaning")
 
 
 def _format_entry(number: str, fields: dict, today: str, replaces: str | None) -> str:

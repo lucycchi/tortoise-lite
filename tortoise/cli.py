@@ -14,7 +14,7 @@ from tortoise.decisions import add_decision, settle_decision
 from tortoise.gate import run_gate
 from tortoise.page import build_page
 from tortoise.project import init_project, load_state
-from tortoise.stages import advance, approve, describe, stage_name
+from tortoise.stages import advance, approve, committed_files, describe, stage_name
 
 
 class UserError(Exception):
@@ -87,7 +87,8 @@ def _run(arguments: argparse.Namespace, root: Path) -> list[str]:
             reason = arguments.despite_failing_tests
             approval = approve(root, datetime.date.today().isoformat(), despite_failing_tests=reason)
             despite = f" despite failing tests ({approval['despite_failing_tests']})" if reason else ""
-            return [f"approved {approved}{despite}; committed and tagged {approval['tag']}"]
+            files = ", ".join(committed_files(root, approval["tag"])) or "nothing new"
+            return [f"approved {approved}{despite}; committed and tagged {approval['tag']}", f"committed: {files}"]
         if arguments.command == "gate":
             result = run_gate(root)
             verdict = "passed" if result["passed"] else "FAILED"

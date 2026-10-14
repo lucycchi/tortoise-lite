@@ -125,7 +125,7 @@ At the end of each milestone, in this order:
 3. The skill runs gstack `/review` and asks Codex for one review. Both review the same changes: everything since the commit recorded at the previous gate.
 4. The results, review findings and the author's choice of which findings to fix go in `docs/gates/milestone-N.md`, where N is the milestone number.
 5. `tortoise page` rebuilds `project.html`.
-6. The author looks at the page and approves with `tortoise approve`. Failing tests block the approval: the skill checks each failing test against its requirement, fixes the code, or changes the test only with the author's agreement, then re-runs the gate. `--despite-failing-tests "reason"` approves anyway and records the reason. The approval commits the work and records the commit and the approval in `tortoise.json`.
+6. The author looks at the page and approves with `tortoise approve`. Failing tests block the approval: the skill checks each failing test against its requirement, fixes the code, or changes the test only with the author's agreement, then re-runs the gate. `--despite-failing-tests "reason"` approves anyway and records the reason. The approval commits the work, tags the commit (such as `tortoise/milestone-1`) and records the approval and its tag in `tortoise.json`.
 
 ## 7. The `tortoise` tool
 
@@ -134,7 +134,7 @@ Plain Python 3, standard library only, with pytest for its own tests.
 | Command | What it does |
 |---|---|
 | `tortoise init` | Works in a new or existing repository and never overwrites a file. Creates `docs/`, an empty decision log and `tortoise.json`, which holds the project name, the current stage, the test command and the approvals |
-| `tortoise stage` | Shows the current stage; `tortoise stage next` moves on, refusing only when the stage needs an approval that is not recorded |
+| `tortoise stage` | Shows the current stage; `tortoise stage next` moves on, refusing when the stage needs an approval that is not recorded, or when the plan has no milestones |
 | `tortoise approve` | Records the author's approval of the current stage |
 | `tortoise decide` | Adds a decision log entry from a short form, or replaces an earlier one |
 | `tortoise gate` | Runs the milestone gate (section 6) |

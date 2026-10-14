@@ -5,8 +5,11 @@ approval commits the approved work and tags the commit, so later reviews can
 compare against it.
 """
 
+import fnmatch
+import os
 import re
 import subprocess
+import tempfile
 from pathlib import Path
 
 from tortoise.project import STAGES, load_state, save_state, write_safely
@@ -14,6 +17,9 @@ from tortoise.project import STAGES, load_state, save_state, write_safely
 NEEDS_APPROVAL = {"spec", "architecture", "plan", "gate", "final-checks"}
 ORDER = list(STAGES)
 MILESTONE_HEADING = re.compile(r"^## Milestone (\d+)\b", re.MULTILINE)
+# File names that usually hold secrets; approving never commits one of these for the first time.
+SECRET_NAMES = (".env", ".env.*", "*.pem", "*.key", "*.p12", "*.pfx", "id_rsa", "id_dsa", "id_ecdsa", "id_ed25519")
+SAFE_NAMES = (".env.example", ".env.sample", ".env.template")
 
 
 def stage_name(state: dict) -> str:
@@ -68,8 +74,15 @@ def approve(root: Path, today: str, despite_failing_tests: str | None = None) ->
         raise ValueError(f"{stage_name(state)} is already approved")
     if stage == "gate":
         _check_gate(state, despite_failing_tests)
+        if state["last_gate"].get("fingerprint") != code_fingerprint(root):
+            raise ValueError("the code has changed since the gate ran; run tortoise gate again")
+
+    paths = [] if stage == "gate" else ["docs", "tortoise.json"]
+    _refuse_new_secret_files(root, paths)
 
     tag = f"tortoise/milestone-{state['milestone']}" if stage == "gate" else f"tortoise/{stage}"
+    if _git_succeeds(root, "rev-parse", "--quiet", "--verify", f"refs/tags/{tag}"):
+        raise ValueError(f"the tag {tag} already exists; delete it or ask why it is there before approving")
     approval = {"stage": stage, "date": today, "tag": tag}
     if stage == "gate":
         approval["milestone"] = state["milestone"]
@@ -86,16 +99,38 @@ def approve(root: Path, today: str, despite_failing_tests: str | None = None) ->
         state["stage"] = "done"
     save_state(root, state)
     try:
-        paths = [] if stage == "gate" else ["docs", "tortoise.json"]
         _git(root, "add", "--all", *paths)
-        _git(root, "commit", "--quiet", "--allow-empty", "-m", f"chore(tortoise): approve {tag.split('/')[1]}")
-        _git(root, "tag", tag)
+        # A document approval names its paths, so files the author staged elsewhere stay out of the commit.
+        _git(root, "commit", "--quiet", "-m", f"chore(tortoise): approve {tag.split('/')[1]}", "--", *paths)
     except ValueError:
+        # Undo the staging and the recorded approval, so a refused commit leaves things as they were.
+        _git_succeeds(root, "reset", "--quiet", "--", *(paths or ["."]))
         write_safely(root / "tortoise.json", before)
         if gate_before is not None:
             write_safely(gate_file, gate_before)
         raise
+    try:
+        _git(root, "tag", tag)
+    except ValueError as error:
+        raise ValueError(f"the approval is committed but tagging failed ({error}); run: git tag {tag}") from error
     return approval
+
+
+def code_fingerprint(root: Path) -> str | None:
+    """A fingerprint of every file except docs/ and tortoise.json, which the gate and the skill write.
+
+    Built in a throwaway git index, so the author's staging area is untouched. None outside git.
+    """
+    with tempfile.TemporaryDirectory() as folder:
+        environment = {**os.environ, "GIT_INDEX_FILE": os.path.join(folder, "index")}
+        add = subprocess.run(
+            ["git", "add", "--all", "--", ".", ":(exclude)docs", ":(exclude)tortoise.json"],
+            cwd=root, env=environment, capture_output=True, text=True,
+        )
+        if add.returncode != 0:
+            return None
+        tree = subprocess.run(["git", "write-tree"], cwd=root, env=environment, capture_output=True, text=True)
+        return tree.stdout.strip() or None
 
 
 def _check_gate(state: dict, despite_failing_tests: str | None) -> None:
@@ -136,9 +171,33 @@ def _approved(state: dict) -> bool:
     return False
 
 
-def _git(root: Path, *arguments: str) -> None:
+def committed_files(root: Path, tag: str) -> list[str]:
+    """The files an approval's commit changed, so the author can see exactly what went in."""
+    return sorted(filter(None, _git(root, "show", "--name-only", "--format=", tag).split("\n")))
+
+
+def _refuse_new_secret_files(root: Path, paths: list[str]) -> None:
+    """Refuse when the approval would commit a secret-looking file git is not already tracking."""
+    untracked = _git(root, "ls-files", "--others", "--exclude-standard", "--", *paths).split("\n")
+    secrets = [
+        path for path in untracked
+        if path and Path(path).name not in SAFE_NAMES
+        and any(fnmatch.fnmatch(Path(path).name, pattern) for pattern in SECRET_NAMES)
+    ]
+    if secrets:
+        raise ValueError(
+            f"these look like secret files and would be committed: {', '.join(secrets)}. "
+            "Add them to .gitignore, or commit them yourself if they are safe to share"
+        )
+
+
+def _git_succeeds(root: Path, *arguments: str) -> bool:
+    return subprocess.run(["git", *arguments], cwd=root, capture_output=True).returncode == 0
+
+
+def _git(root: Path, *arguments: str) -> str:
     try:
-        subprocess.run(["git", *arguments], cwd=root, capture_output=True, text=True, check=True)
+        return subprocess.run(["git", *arguments], cwd=root, capture_output=True, text=True, check=True).stdout
     except subprocess.CalledProcessError as error:
         if "not a git repository" in error.stderr:
             raise ValueError("approving commits your work, so the project must be a git repository") from error
