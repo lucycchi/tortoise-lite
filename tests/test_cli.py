@@ -122,8 +122,11 @@ def test_stage_approve_and_gate_from_the_command_line(tmp_path):
     (tmp_path / "docs" / "PLAN.md").write_text("# Plan\n\n## Milestone 1: Records\n")
     tortoise(tmp_path, "approve")
     tortoise(tmp_path, "stage", "next")
+    building = tortoise(tmp_path, "stage")
     tortoise(tmp_path, "stage", "next")
     gate = tortoise(tmp_path, "gate")
+
+    assert building.stdout == "Current stage: Build, milestone 1 of 1\nTasks ticked: 0 of 0\n"
 
     assert gate.returncode == 0
     assert gate.stdout == (

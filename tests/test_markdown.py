@@ -70,3 +70,12 @@ def test_mermaid_block_becomes_an_escaped_diagram():
 def test_other_code_block_is_escaped_and_not_formatted():
     markdown = "```\n**x** <y>\n```"
     assert to_html(markdown) == "<pre><code>**x** &lt;y&gt;</code></pre>"
+
+
+def test_task_checkboxes():
+    assert to_html("- [x] Task 1: store\n- [ ] Task 2: chart") == (
+        "<ul>\n"
+        '<li class="task done"><span class="box" aria-label="done">✓</span><span>Task 1: store</span></li>\n'
+        '<li class="task"><span class="box" aria-label="not done"></span><span>Task 2: chart</span></li>\n'
+        "</ul>"
+    )

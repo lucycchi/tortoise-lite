@@ -113,3 +113,33 @@ def test_page_loads_a_mermaid_release_without_the_known_label_injection_flaw():
 
     version = tuple(int(part) for part in MERMAID_URL.split("mermaid@")[1].split("/")[0].split("."))
     assert version >= (11, 10, 0)
+
+
+def test_page_shows_progress_requirements_and_final_checks_in_order(project):
+    docs = project / "docs"
+    (docs / "SPEC.md").write_text("# Spec\n\n- R1: store lab results\n- R2: chart them\n")
+    (docs / "PLAN.md").write_text(
+        "# Plan\n\n## Milestone 1: Records\n\n- [x] Task 1: store. Requirements: R1\n- [ ] Task 2: list. Requirements: R1\n"
+        "\n## Milestone 2: Charts\n\n- [ ] Task 3: chart. Requirements: R2\n"
+    )
+    (docs / "FINAL_CHECKS.md").write_text("# Final checks\n\n- QA: no bugs found.\n")
+
+    page = build_page(project).read_text()
+
+    assert page.index('id="summary"') < page.index('id="progress"') < page.index('id="requirements"') \
+        < page.index('id="architecture"') < page.index('id="decisions"') < page.index('id="gates"') \
+        < page.index('id="final-checks"')
+    progress = page.split('<section id="progress">')[1].split("</section>")[0]
+    assert "<h3>Milestone 1: Records (1 of 2 done)</h3>" in progress
+    assert '<li class="task done"><span class="box" aria-label="done">✓</span><span>Task 1: store. Requirements: R1</span></li>' in progress
+    assert "<h3>Milestone 2: Charts (0 of 1 done)</h3>" in progress
+    assert "R2: chart them" in page.split('<section id="requirements">')[1]
+    assert "QA: no bugs found." in page.split('<section id="final-checks">')[1]
+
+
+def test_page_without_a_plan_says_so(project):
+    page = build_page(project).read_text()
+
+    assert "The plan is not written yet." in page
+    assert "The requirements are not written yet." in page
+    assert "Final checks have not run yet." in page

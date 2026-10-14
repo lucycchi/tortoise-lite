@@ -14,6 +14,7 @@ TABLE_SEPARATOR = re.compile(r"^\|?\s*:?-{3,}")
 CODE_SPAN = re.compile(r"`([^`]+)`")
 LINK = re.compile(r"\[([^\]]+)\]\(([^()\n]*(?:\([^()\n]*\)[^()\n]*)*)\)")
 BOLD = re.compile(r"\*\*(.+?)\*\*")
+TASK_BOX = re.compile(r"^\[([ xX])\] (.*)$")
 # A link is kept only if it is a web address, a same-page anchor or a plain relative path.
 SAFE_URL = re.compile(r"^(https?://[^\s\"'<>`]+|#[\w-]+|[\w./-]+)$")
 
@@ -78,12 +79,16 @@ def _list(items: list[tuple[int, bool, str]], start: int = 0) -> tuple[str, int]
     rendered = []
     i = start
     while i < len(items) and items[i][0] == indent:
-        text = _inline(items[i][2])
+        text, css = _inline(items[i][2]), ""
+        if checkbox := TASK_BOX.match(items[i][2]):
+            done = checkbox.group(1) != " "
+            box = '<span class="box" aria-label="done">✓</span>' if done else '<span class="box" aria-label="not done"></span>'
+            text, css = f"{box}<span>{_inline(checkbox.group(2))}</span>", ' class="task done"' if done else ' class="task"'
         i += 1
         if i < len(items) and items[i][0] > indent:
             nested, i = _list(items, i)
             text += "\n" + nested
-        rendered.append(f"<li>{text}</li>")
+        rendered.append(f"<li{css}>{text}</li>")
     return f"<{tag}>\n" + "\n".join(rendered) + f"\n</{tag}>", i
 
 

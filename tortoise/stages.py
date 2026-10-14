@@ -12,11 +12,11 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from tortoise.plan import read_milestones
 from tortoise.project import STAGES, load_state, save_state, write_safely
 
 NEEDS_APPROVAL = {"spec", "architecture", "plan", "gate", "final-checks"}
 ORDER = list(STAGES)
-MILESTONE_HEADING = re.compile(r"^## Milestone (\d+)\b", re.MULTILINE)
 # File names that usually hold secrets; approving never commits one of these for the first time.
 SECRET_NAMES = (".env", ".env.*", "*.pem", "*.key", "*.p12", "*.pfx", "id_rsa", "id_dsa", "id_ecdsa", "id_ed25519")
 SAFE_NAMES = (".env.example", ".env.sample", ".env.template")
@@ -48,7 +48,7 @@ def advance(root: Path) -> dict:
         raise ValueError(f"{STAGES[stage]} needs your approval first: run tortoise approve")
 
     if stage == "plan":
-        milestones = MILESTONE_HEADING.findall(_read(root / "docs" / "PLAN.md"))
+        milestones = read_milestones(_read(root / "docs" / "PLAN.md"))
         if not milestones:
             raise ValueError('PLAN.md has no milestones; add headings such as "## Milestone 1: Records"')
         state.update(stage="build", milestone=1, milestones=len(milestones))

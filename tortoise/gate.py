@@ -10,6 +10,7 @@ import subprocess
 from pathlib import Path
 
 from tortoise.page import build_page
+from tortoise.plan import read_milestones
 from tortoise.project import load_state, save_state, write_safely
 from tortoise.stages import code_fingerprint
 
@@ -39,6 +40,7 @@ def run_gate(root: Path) -> dict:
         f"## Tests\n\n{verdict} `{command}` finished with exit code {run.returncode}.\n\n"
         f"```\n{output}\n```\n\n"
         f"## Requirement coverage\n\n{_coverage(root)}\n"
+        f"## Tasks\n\n{_unticked_tasks(root, milestone)}\n"
     )
     path = root / "docs" / "gates" / f"milestone-{milestone}.md"
     path.parent.mkdir(exist_ok=True)
@@ -65,6 +67,18 @@ def _coverage(root: Path) -> str:
     if not gaps:
         return "Every requirement in SPEC.md is named by a task in PLAN.md.\n"
     return "\n".join(gaps) + "\n"
+
+
+def _unticked_tasks(root: Path, number: int) -> str:
+    """Which of this milestone's tasks in PLAN.md are not ticked yet."""
+    milestone = next((m for m in read_milestones(_read(root / "docs" / "PLAN.md")) if m.number == number), None)
+    if milestone is None:
+        return f"PLAN.md has no milestone {number}.\n"
+    unticked = [text for ticked, text in milestone.tasks if not ticked]
+    if not unticked:
+        return f"Every task in milestone {number} is ticked ({milestone.done} of {milestone.total}).\n"
+    listed = "\n".join(f"- {text}" for text in unticked)
+    return f"{milestone.done} of {milestone.total} tasks in milestone {number} are ticked. Not ticked:\n\n{listed}\n"
 
 
 def _read(path: Path) -> str:

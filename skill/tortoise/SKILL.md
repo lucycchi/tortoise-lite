@@ -77,16 +77,16 @@ Invoke gstack `/office-hours`. Give it `docs/PRD_REVIEW.md` as the starting poin
 
 ### 4. Plan
 
-1. Invoke Superpowers `writing-plans`. Tell it, before it starts: save the plan to `docs/PLAN.md` (not `docs/superpowers/plans/`); group the tasks under headings `## Milestone 1: <name>`, `## Milestone 2: <name>`, each milestone a few tasks that together give the author something to look at; give every task a line `Requirements: R1, R3`; and **when it finishes, do not offer an execution choice**, because Tortoise builds inline, test-first.
+1. Invoke Superpowers `writing-plans`. Tell it, before it starts: save the plan to `docs/PLAN.md` (not `docs/superpowers/plans/`); group the tasks under headings `## Milestone 1: <name>`, `## Milestone 2: <name>`, each milestone a few tasks that together give the author something to look at; write every task as one checkbox line, such as `- [ ] Task 3: chart the results. Requirements: R2`; and **when it finishes, do not offer an execution choice**, because Tortoise builds inline, test-first.
 2. Ask the author to approve the plan. `tortoise stage next` then starts milestone 1.
 
 ### 5. Build (once per milestone)
 
-Build the current milestone's tasks one at a time in this session, each with the Superpowers test-driven-development skill. Do not use subagent-driven development. When the milestone's tasks are done, run `tortoise stage next` to reach its gate.
+Build the current milestone's tasks one at a time in this session, each with the Superpowers test-driven-development skill. Do not use subagent-driven development. As soon as a task's tests pass, tick its box in `docs/PLAN.md` (`- [x]`); never tick a task whose tests have not passed. `tortoise stage` shows how many are ticked. When the milestone's tasks are done, run `tortoise stage next` to reach its gate.
 
 ### 6. Milestone gate (once per milestone)
 
-1. Run `tortoise gate`. It runs the tests, checks requirement coverage, writes `docs/gates/milestone-N.md` and prints the review base (the tag of the last approval).
+1. Run `tortoise gate`. It runs the tests, checks requirement coverage, lists the milestone's unticked tasks, writes `docs/gates/milestone-N.md` and prints the review base (the tag of the last approval). Finish or explain any unticked task before asking for approval.
 2. **If tests failed**, for each failing test find the requirement it covers and decide which side is wrong:
    - The code is wrong: fix it with the test-driven-development skill.
    - The test does not match what the spec intends: do not edit it yet. Show the author the requirement, the test and why they disagree; change the test only once they agree, and note their choice under `## Author's choices` in the gate file.
@@ -99,4 +99,7 @@ Build the current milestone's tasks one at a time in this session, each with the
 
 ### 7. Final checks
 
-Run gstack `/qa` if the project has a running app, and gstack `/cso`. Fix bugs test-first, run the checks once more, then ask the author to approve final checks; that finishes the project.
+1. Run gstack `/qa` if the project has a running app, and gstack `/cso`. Fix bugs test-first, then run the checks once more.
+2. Write `docs/FINAL_CHECKS.md`: what each check found, what was fixed, and the author's choices about anything left, following the writing rules.
+3. Write or update the project's `README.md`: what it does, how to install it, how to run it and its tests, and how to use it, for a junior software engineer.
+4. Run `tortoise page`, then ask the author to approve final checks; that finishes the project.

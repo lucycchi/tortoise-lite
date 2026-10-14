@@ -17,7 +17,7 @@ Tortoise Lite is a Claude Code skill plus a small command-line tool. It does thr
 
 The previous version grew from 5,090 to 24,895 words by accepting every review recommendation, and spent most of its build time on per-task verifiers and retries.
 
-1. **Size limits.** This design stays under 2,200 words. The `tortoise` tool stays under about 1,500 lines of Python, not counting tests.
+1. **Size limits.** This design stays under 2,500 words. The `tortoise` tool stays under about 1,500 lines of Python, not counting tests.
 2. **Additions need a stated cost.** Any new feature, rule or check, whether suggested by a review, by Claude or by Codex, is proposed with what it adds: lines of code, time per milestone and new moving parts. The author approves it explicitly. "Do all the recommendations" is not applied to scope additions without that list.
 3. **One review per document.** The spec, the architecture and the plan each get at most one review unless the author asks for another.
 
@@ -35,10 +35,10 @@ The previous version grew from 5,090 to 24,895 words by accepting every review r
 | 1. Ideas | Explore the problem, who it is for, and what success means, starting from the PRD review's answered questions, or from the author's description when there is no PRD | gstack `/office-hours` | A design note and the first decisions | No |
 | 2. Spec | Turn the design note into requirements numbered R1, R2 and so on, then run one review using `prompts/spec-review.md`; the author rules on each finding | Superpowers brainstorming, then Codex with the review prompt | `SPEC.md` and `SPEC_REVIEW.md` | Yes |
 | 3. Architecture | Design the system and draw its diagrams; in an existing codebase, first draw how it works today | `engineering:system-design`, or `feature-dev:code-architect` inside an existing codebase | `ARCHITECTURE.md` with diagrams | Yes |
-| 4. Plan | Break the work into numbered milestones of a few tasks each; each task has a line such as "Requirements: R1, R3" | Superpowers `writing-plans` | `PLAN.md` | Yes |
-| 5. Build | For each task, write a failing test, make it pass, then tidy the code | Superpowers test-driven development | Code and tests | No |
+| 4. Plan | Break the work into numbered milestones of a few tasks each; each task is a checkbox line such as "- [ ] Task 3: chart the results. Requirements: R2" | Superpowers `writing-plans` | `PLAN.md` | Yes |
+| 5. Build | For each task, write a failing test, make it pass, then tidy the code; then tick the task's box in `PLAN.md` | Superpowers test-driven development | Code and tests | No |
 | 6. Milestone gate | See section 6 | `tortoise gate`, gstack `/review`, Codex once | Gate result on the page | Yes, before the next milestone |
-| 7. Final checks | Test the running product and check security; bugs are fixed test-first and the checks run once more | gstack `/qa` and `/cso` | Bug fixes | Yes; the project is done |
+| 7. Final checks | Test the running product and check security; bugs are fixed test-first and the checks run once more; write or update the project's README (how to install, run and use it) | gstack `/qa` and `/cso` | Bug fixes, `FINAL_CHECKS.md` (results, fixes and the author's choices) and `README.md` | Yes; the project is done |
 
 Stages 5 and 6 repeat once per milestone in `PLAN.md`. Final checks start after the last milestone's gate is approved.
 
@@ -77,9 +77,12 @@ The system in plain English, with each Mermaid diagram placed next to the text i
 One web page built from the records by `tortoise page`, never edited by hand. It contains, in order:
 
 1. a one-screen summary: the problem, the approach, the key decisions and the current stage;
-2. the architecture with its diagrams;
-3. the decisions;
-4. the milestone gates and their results.
+2. progress: each milestone's tasks with their checkboxes and a count such as "3 of 5 done";
+3. the requirements from `SPEC.md`;
+4. the architecture with its diagrams;
+5. the decisions;
+6. the milestone gates and their results;
+7. the final checks.
 
 It has light and dark themes and works on a phone. Diagrams are drawn in the browser by the Mermaid library. A diagram that fails to draw shows an error box in its place, never a blank. Record text is escaped when the page is built and Mermaid runs in its strict mode, so nothing in a record can run as script.
 
@@ -120,7 +123,7 @@ When a condition is unclear, the architecture stage asks the author. Each choice
 
 At the end of each milestone, in this order:
 
-1. `tortoise gate` runs the project's test command, which is named once in `tortoise.json`, and lists any requirement in `SPEC.md` that no task in `PLAN.md` names.
+1. `tortoise gate` runs the project's test command, which is named once in `tortoise.json`, lists any requirement in `SPEC.md` that no task in `PLAN.md` names, and lists the milestone's tasks that are not ticked.
 2. A fresh agent compares the code with `ARCHITECTURE.md` and updates the diagrams, or lists the gaps for the author.
 3. The skill runs gstack `/review` and asks Codex for one review. Both review the same changes: everything since the commit recorded at the previous gate.
 4. The results, review findings and the author's choice of which findings to fix go in `docs/gates/milestone-N.md`, where N is the milestone number.
@@ -134,7 +137,7 @@ Plain Python 3, standard library only, with pytest for its own tests.
 | Command | What it does |
 |---|---|
 | `tortoise init` | Works in a new or existing repository and never overwrites a file. Creates `docs/`, an empty decision log and `tortoise.json`, which holds the project name, the current stage, the test command and the approvals |
-| `tortoise stage` | Shows the current stage; `tortoise stage next` moves on, refusing when the stage needs an approval that is not recorded, or when the plan has no milestones |
+| `tortoise stage` | Shows the current stage and, during a milestone, how many of its tasks are ticked; `tortoise stage next` moves on, refusing when the stage needs an approval that is not recorded, or when the plan has no milestones |
 | `tortoise approve` | Records the author's approval of the current stage |
 | `tortoise decide` | Adds a decision log entry from a short form, or replaces an earlier one |
 | `tortoise gate` | Runs the milestone gate (section 6) |

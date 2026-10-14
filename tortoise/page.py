@@ -10,6 +10,7 @@ from pathlib import Path
 
 from tortoise.decisions import settled_decisions
 from tortoise.markdown import to_html
+from tortoise.plan import read_milestones
 from tortoise.project import load_state, write_safely
 from tortoise.stages import describe
 
@@ -29,9 +30,14 @@ def build_page(root: Path) -> Path:
             f"<header>\n<h1>{name}</h1>\n<p class=\"stage\">Current stage: {describe(state)}</p>\n</header>",
             _section("summary", "Summary", to_html(summary, heading_offset=1), "The summary is not written yet.", own_heading=True)
             + "\n" + _key_decisions(decisions_text),
+            _section("progress", "Progress", _progress(_read(docs / "PLAN.md")), "The plan is not written yet.", own_heading=True),
+            _section("requirements", "Requirements", to_html(_read(docs / "SPEC.md"), heading_offset=1),
+                     "The requirements are not written yet."),
             _section("architecture", "Architecture", to_html(architecture, heading_offset=1), "The architecture is not written yet."),
             _section("decisions", "Decisions", to_html(decisions_text, heading_offset=1), "The decision log is not written yet."),
             _section("gates", "Milestone gates", _gates(docs / "gates"), "No milestone gates yet.", own_heading=True),
+            _section("final-checks", "Final checks", to_html(_read(docs / "FINAL_CHECKS.md"), heading_offset=1),
+                     "Final checks have not run yet."),
         ]
     )
     path = docs / "project.html"
@@ -66,6 +72,16 @@ def _key_decisions(decisions_text: str) -> str:
         return "<h3>Key decisions</h3>\n<p>No settled decisions yet.</p>"
     items = "\n".join(f"<li>{html.escape(question)} {html.escape(choice)}</li>" for question, choice in settled)
     return f"<h3>Key decisions</h3>\n<ul>\n{items}\n</ul>"
+
+
+def _progress(plan: str) -> str:
+    """Each milestone's tasks as ticked or unticked boxes, with a count."""
+    parts = []
+    for milestone in read_milestones(plan):
+        boxes = "\n".join(f"- [{'x' if ticked else ' '}] {text}" for ticked, text in milestone.tasks)
+        heading = f"<h3>Milestone {milestone.number}: {html.escape(milestone.name)} ({milestone.done} of {milestone.total} done)</h3>"
+        parts.append(heading + ("\n" + to_html(boxes) if boxes else "\n<p>No tasks listed.</p>"))
+    return "\n".join(parts)
 
 
 def _gates(folder: Path) -> str:
@@ -125,6 +141,11 @@ pre.mermaid { background: #ffffff; text-align: center; }
 table { display: block; overflow-x: auto; border-collapse: collapse; margin: 16px 0; }
 th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
 th { background: var(--panel); }
+li.task { list-style: none; margin-left: -1.3em; display: flex; gap: 8px; align-items: baseline; }
+li.task .box { flex: none; width: 1.1em; height: 1.1em; border: 2px solid var(--accent); border-radius: 4px;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 700;
+  transform: translateY(0.15em); }
+li.task.done .box { background: var(--accent); color: var(--background); }
 .diagram-error { background: var(--error-background); color: var(--error-text);
   border-left: 4px solid var(--error-text); padding: 12px; border-radius: 6px; }
 .diagram-error pre { background: transparent; color: inherit; padding: 8px 0 0; margin: 0; }

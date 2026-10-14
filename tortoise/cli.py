@@ -13,6 +13,7 @@ from pathlib import Path
 from tortoise.decisions import add_decision, settle_decision
 from tortoise.gate import run_gate
 from tortoise.page import build_page
+from tortoise.plan import read_milestones
 from tortoise.project import init_project, load_state
 from tortoise.stages import advance, approve, committed_files, describe, stage_name
 
@@ -81,7 +82,14 @@ def _run(arguments: argparse.Namespace, root: Path) -> list[str]:
         if arguments.command == "stage":
             if arguments.move:
                 return [f"Now at: {describe(advance(root))}"]
-            return [f"Current stage: {describe(load_state(root))}"]
+            state = load_state(root)
+            lines = [f"Current stage: {describe(state)}"]
+            if state["stage"] in ("build", "gate"):
+                plan = (root / "docs" / "PLAN.md").read_text() if (root / "docs" / "PLAN.md").exists() else ""
+                milestone = next((m for m in read_milestones(plan) if m.number == state["milestone"]), None)
+                if milestone:
+                    lines.append(f"Tasks ticked: {milestone.done} of {milestone.total}")
+            return lines
         if arguments.command == "approve":
             approved = stage_name(load_state(root))
             reason = arguments.despite_failing_tests

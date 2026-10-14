@@ -121,3 +121,25 @@ def test_gate_rebuilds_the_page(tmp_path):
     run_gate(tmp_path)
 
     assert "Milestone 1 gate" in (tmp_path / "docs" / "project.html").read_text()
+
+
+def test_gate_lists_the_milestones_unticked_tasks(tmp_path):
+    gate = project_at_gate(tmp_path)
+    (tmp_path / "docs" / "PLAN.md").write_text(
+        "# Plan\n\n## Milestone 1: Records\n\n- [x] Task 1: store. Requirements: R1\n- [ ] Task 2: list. Requirements: R2\n"
+        "\n## Milestone 2: Export\n\n- [ ] Task 3: export. Requirements: R3\n"
+    )
+
+    run_gate(tmp_path)
+
+    tasks = gate.read_text().split("## Tasks")[1].split("## ")[0]
+    assert tasks == "\n\n1 of 2 tasks in milestone 1 are ticked. Not ticked:\n\n- Task 2: list. Requirements: R2\n\n"
+
+
+def test_gate_says_when_every_task_is_ticked(tmp_path):
+    gate = project_at_gate(tmp_path)
+    (tmp_path / "docs" / "PLAN.md").write_text("# Plan\n\n## Milestone 1: Records\n\n- [x] Task 1: store. Requirements: R1\n")
+
+    run_gate(tmp_path)
+
+    assert "Every task in milestone 1 is ticked (1 of 1)." in gate.read_text()
