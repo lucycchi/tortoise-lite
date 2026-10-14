@@ -176,14 +176,30 @@ def committed_files(root: Path, tag: str) -> list[str]:
     return sorted(filter(None, _git(root, "show", "--name-only", "--format=", tag).split("\n")))
 
 
+def mark_new_files_for_review(root: Path) -> list[str]:
+    """Mark new files as intended to add, so `git diff <review base>` shows them to reviewers.
+
+    Their contents are not staged. Secret-looking files are never marked, so a reviewer never reads them.
+    Outside git there is nothing to mark.
+    """
+    if not _git_succeeds(root, "rev-parse", "--git-dir"):
+        return []
+    new = [path for path in _git(root, "ls-files", "--others", "--exclude-standard").split("\n")
+           if path and not _looks_secret(path)]
+    if new:
+        _git(root, "add", "--intent-to-add", "--", *new)
+    return new
+
+
+def _looks_secret(path: str) -> bool:
+    name = Path(path).name
+    return name not in SAFE_NAMES and any(fnmatch.fnmatch(name, pattern) for pattern in SECRET_NAMES)
+
+
 def _refuse_new_secret_files(root: Path, paths: list[str]) -> None:
     """Refuse when the approval would commit a secret-looking file git is not already tracking."""
     untracked = _git(root, "ls-files", "--others", "--exclude-standard", "--", *paths).split("\n")
-    secrets = [
-        path for path in untracked
-        if path and Path(path).name not in SAFE_NAMES
-        and any(fnmatch.fnmatch(Path(path).name, pattern) for pattern in SECRET_NAMES)
-    ]
+    secrets = [path for path in untracked if path and _looks_secret(path)]
     if secrets:
         raise ValueError(
             f"these look like secret files and would be committed: {', '.join(secrets)}. "

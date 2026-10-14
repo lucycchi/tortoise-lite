@@ -12,7 +12,7 @@ from pathlib import Path
 from tortoise.page import build_page
 from tortoise.plan import read_milestones
 from tortoise.project import load_state, save_state, write_safely
-from tortoise.stages import code_fingerprint
+from tortoise.stages import code_fingerprint, mark_new_files_for_review
 
 OUTPUT_LINES_KEPT = 30
 REQUIREMENT = re.compile(r"\bR(\d+)\b")
@@ -25,6 +25,7 @@ def run_gate(root: Path) -> dict:
         raise ValueError("tortoise gate only runs at a milestone gate; finish the build and run tortoise stage next")
     milestone = state["milestone"]
     review_base = state["approvals"][-1]["tag"]
+    new_files = mark_new_files_for_review(root)
 
     command = state["test_command"]
     # The test command is the author's own, set once in tortoise.json, so it runs through the shell
@@ -50,7 +51,8 @@ def run_gate(root: Path) -> dict:
     state["last_gate"] = {"milestone": milestone, "passed": passed, "fingerprint": code_fingerprint(root)}
     save_state(root, state)
     build_page(root)
-    return {"passed": passed, "exit_code": run.returncode, "review_base": review_base, "path": path}
+    return {"passed": passed, "exit_code": run.returncode, "review_base": review_base, "path": path,
+            "new_files": new_files}
 
 
 def _coverage(root: Path) -> str:

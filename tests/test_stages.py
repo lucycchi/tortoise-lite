@@ -278,3 +278,17 @@ def test_a_document_approval_leaves_files_the_author_staged_alone(project):
 
     assert "notes.txt" not in git(project, "show", "--name-only", "--format=", "tortoise/spec")
     assert git(project, "diff", "--cached", "--name-only") == "notes.txt"
+
+
+def test_the_gate_makes_new_files_visible_to_reviews_but_never_secret_files(project):
+    move_to(project, "build")
+    advance(project)
+    (project / "app.py").write_text("print('new code')\n")
+    (project / ".env").write_text("SECRET=1\n")
+
+    run_gate(project)
+
+    in_review = git(project, "diff", "--name-only", "tortoise/plan")
+    assert "app.py" in in_review.split("\n")
+    assert ".env" not in in_review.split("\n")
+    assert git(project, "diff", "--cached", "--name-only", "--diff-filter=AM", "--", "app.py") == ""
