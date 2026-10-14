@@ -15,6 +15,7 @@ STAGES = {
     "build": "Build",
     "gate": "Milestone gate",
     "final-checks": "Final checks",
+    "done": "Done",
 }
 
 EMPTY_DECISION_LOG = """# Decisions
@@ -74,3 +75,7 @@ def write_safely(path: Path, text: str) -> None:
 
 def load_state(root: Path) -> dict:
     return json.loads((root / "tortoise.json").read_text())
+
+
+def save_state(root: Path, state: dict) -> None:
+    write_safely(root / "tortoise.json", json.dumps(state, indent=2) + "\n")

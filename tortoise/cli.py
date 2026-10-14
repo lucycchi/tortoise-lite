@@ -1,4 +1,4 @@
-"""The tortoise command line: tortoise init, tortoise decide and tortoise page.
+"""The tortoise command line: init, decide, page, stage, approve and gate.
 
 Every command works on the project in the current folder. A problem the user
 can fix prints one plain line to standard error and exits with code 1.
@@ -11,8 +11,10 @@ import sys
 from pathlib import Path
 
 from tortoise.decisions import add_decision, settle_decision
+from tortoise.gate import run_gate
 from tortoise.page import build_page
-from tortoise.project import init_project
+from tortoise.project import init_project, load_state
+from tortoise.stages import advance, approve, describe, stage_name
 
 
 class UserError(Exception):
@@ -34,6 +36,14 @@ def main(argv: list[str] | None = None) -> None:
     decide.add_argument("--replaces", metavar="NUMBER", help="the decision the new one replaces")
 
     commands.add_parser("page", help="build docs/project.html")
+
+    stage = commands.add_parser("stage", help="show the current stage, or move to the next one")
+    stage.add_argument("move", nargs="?", choices=["next"])
+
+    approve_command = commands.add_parser("approve", help="record your approval of the current stage, then commit and tag it")
+    approve_command.add_argument("--despite-failing-tests", metavar="REASON",
+                                 help="approve a gate whose tests failed, recording why")
+    commands.add_parser("gate", help="run the milestone gate: tests, requirement coverage, page")
 
     arguments = parser.parse_args(argv)
     try:
@@ -66,6 +76,28 @@ def _run(arguments: argparse.Namespace, root: Path) -> list[str]:
             raise UserError(str(error)) from error
         replacing = f", replacing {arguments.replaces}" if arguments.replaces else ""
         return [f"added {number} (proposed){replacing}"]
+
+    try:
+        if arguments.command == "stage":
+            if arguments.move:
+                return [f"Now at: {describe(advance(root))}"]
+            return [f"Current stage: {describe(load_state(root))}"]
+        if arguments.command == "approve":
+            approved = stage_name(load_state(root))
+            reason = arguments.despite_failing_tests
+            approval = approve(root, datetime.date.today().isoformat(), despite_failing_tests=reason)
+            despite = f" despite failing tests ({approval['despite_failing_tests']})" if reason else ""
+            return [f"approved {approved}{despite}; committed and tagged {approval['tag']}"]
+        if arguments.command == "gate":
+            result = run_gate(root)
+            verdict = "passed" if result["passed"] else "FAILED"
+            return [
+                f"tests {verdict} (exit code {result['exit_code']})",
+                f"results in {result['path'].relative_to(root)}; reviews compare against {result['review_base']}",
+                "page rebuilt: docs/project.html",
+            ]
+    except ValueError as error:
+        raise UserError(str(error)) from error
 
     path = build_page(root)
     return [f"wrote {path.relative_to(root)}"]

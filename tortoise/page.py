@@ -10,7 +10,8 @@ from pathlib import Path
 
 from tortoise.decisions import settled_decisions
 from tortoise.markdown import to_html
-from tortoise.project import STAGES, load_state, write_safely
+from tortoise.project import load_state, write_safely
+from tortoise.stages import describe
 
 KEY_DECISIONS_SHOWN = 5
 MERMAID_URL = "https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.esm.min.mjs"
@@ -25,7 +26,7 @@ def build_page(root: Path) -> Path:
 
     body = "\n".join(
         [
-            f"<header>\n<h1>{name}</h1>\n<p class=\"stage\">Current stage: {STAGES[state['stage']]}</p>\n</header>",
+            f"<header>\n<h1>{name}</h1>\n<p class=\"stage\">Current stage: {describe(state)}</p>\n</header>",
             _section("summary", "Summary", to_html(summary, heading_offset=1), "The summary is not written yet.", own_heading=True)
             + "\n" + _key_decisions(decisions_text),
             _section("architecture", "Architecture", to_html(architecture, heading_offset=1), "The architecture is not written yet."),

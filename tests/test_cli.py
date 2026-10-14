@@ -91,3 +91,66 @@ def test_an_unreadable_decision_form_is_a_plain_error(tmp_path):
     assert not_an_object.stderr == "tortoise: the decision form list.json must hold a JSON object\n"
     assert absent.returncode == 1
     assert absent.stderr.startswith("tortoise: could not read the decision form absent.json:")
+
+
+def git(folder, *arguments):
+    subprocess.run(["git", *arguments], cwd=folder, capture_output=True, check=True)
+
+
+def test_stage_approve_and_gate_from_the_command_line(tmp_path):
+    git(tmp_path, "init", "-q", "-b", "main")
+    git(tmp_path, "config", "user.name", "Test Author")
+    git(tmp_path, "config", "user.email", "author@example.com")
+    tortoise(tmp_path, "init", "--name", "Lab tracker", "--test-command", "echo 3 passed")
+
+    shown = tortoise(tmp_path, "stage")
+    moved = [tortoise(tmp_path, "stage", "next").stdout for _ in range(2)]
+    blocked = tortoise(tmp_path, "stage", "next")
+    approved = tortoise(tmp_path, "approve")
+
+    assert shown.stdout == "Current stage: PRD review\n"
+    assert moved == ["Now at: Ideas\n", "Now at: Spec (needs your approval before moving on)\n"]
+    assert (blocked.returncode, blocked.stderr) == (1, "tortoise: Spec needs your approval first: run tortoise approve\n")
+    assert approved.stdout == "approved Spec; committed and tagged tortoise/spec\n"
+
+    tortoise(tmp_path, "stage", "next")
+    tortoise(tmp_path, "approve")
+    tortoise(tmp_path, "stage", "next")
+    (tmp_path / "docs" / "PLAN.md").write_text("# Plan\n\n## Milestone 1: Records\n")
+    tortoise(tmp_path, "approve")
+    tortoise(tmp_path, "stage", "next")
+    tortoise(tmp_path, "stage", "next")
+    gate = tortoise(tmp_path, "gate")
+
+    assert gate.returncode == 0
+    assert gate.stdout == (
+        "tests passed (exit code 0)\n"
+        "results in docs/gates/milestone-1.md; reviews compare against tortoise/plan\n"
+        "page rebuilt: docs/project.html\n"
+    )
+
+
+def test_approve_despite_failing_tests_from_the_command_line(tmp_path):
+    git(tmp_path, "init", "-q", "-b", "main")
+    git(tmp_path, "config", "user.name", "Test Author")
+    git(tmp_path, "config", "user.email", "author@example.com")
+    tortoise(tmp_path, "init", "--name", "Lab tracker", "--test-command", "exit 1")
+    for _ in range(4):
+        tortoise(tmp_path, "stage", "next")
+        if _ == 3:
+            (tmp_path / "docs" / "PLAN.md").write_text("# Plan\n\n## Milestone 1: Records\n")
+        tortoise(tmp_path, "approve")
+    tortoise(tmp_path, "stage", "next")
+    tortoise(tmp_path, "stage", "next")
+    tortoise(tmp_path, "gate")
+
+    blocked = tortoise(tmp_path, "approve")
+    allowed = tortoise(tmp_path, "approve", "--despite-failing-tests", "test server down")
+
+    assert blocked.returncode == 1
+    assert blocked.stderr.startswith("tortoise: the tests failed at the last gate run.")
+    assert allowed.returncode == 0
+    assert allowed.stdout == (
+        "approved Milestone gate, milestone 1 of 1 despite failing tests (test server down); "
+        "committed and tagged tortoise/milestone-1\n"
+    )

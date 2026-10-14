@@ -125,7 +125,7 @@ At the end of each milestone, in this order:
 3. The skill runs gstack `/review` and asks Codex for one review. Both review the same changes: everything since the commit recorded at the previous gate.
 4. The results, review findings and the author's choice of which findings to fix go in `docs/gates/milestone-N.md`, where N is the milestone number.
 5. `tortoise page` rebuilds `project.html`.
-6. The author looks at the page and approves with `tortoise approve`, which commits the work and records the commit and the approval in `tortoise.json`.
+6. The author looks at the page and approves with `tortoise approve`. Failing tests block the approval: the skill checks each failing test against its requirement, fixes the code, or changes the test only with the author's agreement, then re-runs the gate. `--despite-failing-tests "reason"` approves anyway and records the reason. The approval commits the work and records the commit and the approval in `tortoise.json`.
 
 ## 7. The `tortoise` tool
 
