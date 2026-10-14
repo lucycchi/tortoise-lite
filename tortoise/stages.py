@@ -63,8 +63,8 @@ def advance(root: Path) -> dict:
 def approve(root: Path, today: str, despite_failing_tests: str | None = None) -> dict:
     """Record the author's approval of the current stage, then commit and tag the approved work.
 
-    A gate approval commits every changed file; other approvals commit only docs/ and tortoise.json,
-    so unrelated work in progress is left alone.
+    Gate and final-checks approvals commit every changed file; the others commit only docs/ and
+    tortoise.json.
     """
     state = load_state(root)
     stage = state["stage"]
@@ -77,7 +77,9 @@ def approve(root: Path, today: str, despite_failing_tests: str | None = None) ->
         if state["last_gate"].get("fingerprint") != code_fingerprint(root):
             raise ValueError("the code has changed since the gate ran; run tortoise gate again")
 
-    paths = [] if stage == "gate" else ["docs", "tortoise.json"]
+    # Gates and final checks commit all the work (code, tests, the README); the document stages commit
+    # only docs/ and tortoise.json, so unrelated work in progress is left alone.
+    paths = [] if stage in ("gate", "final-checks") else ["docs", "tortoise.json"]
     _refuse_new_secret_files(root, paths)
 
     tag = f"tortoise/milestone-{state['milestone']}" if stage == "gate" else f"tortoise/{stage}"

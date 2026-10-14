@@ -292,3 +292,15 @@ def test_the_gate_makes_new_files_visible_to_reviews_but_never_secret_files(proj
     assert "app.py" in in_review.split("\n")
     assert ".env" not in in_review.split("\n")
     assert git(project, "diff", "--cached", "--name-only", "--diff-filter=AM", "--", "app.py") == ""
+
+
+def test_approving_final_checks_commits_the_readme_and_bug_fixes(project):
+    move_to(project, "final-checks")
+    (project / "README.md").write_text("# Lab tracker\n")
+    (project / "app.py").write_text("print('fixed after QA')\n")
+
+    approve(project, today="2026-10-20")
+
+    committed = git(project, "show", "--name-only", "--format=", "tortoise/final-checks").split("\n")
+    assert "README.md" in committed and "app.py" in committed
+    assert git(project, "status", "--porcelain") == ""
