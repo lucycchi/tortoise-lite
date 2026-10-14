@@ -64,6 +64,7 @@ One file; new entries are added to the end. Only material decisions are logged: 
 - the options considered;
 - the research, as links with a one-sentence summary each;
 - the choice and the reason;
+- terms a junior software engineer may not know, with their meanings, which the tool adds to the log's glossary;
 - who proposed it (the author, or the exact model) and the date;
 - its status: proposed, settled, or replaced by a later entry. Only the author settles a decision; a model can only propose one.
 

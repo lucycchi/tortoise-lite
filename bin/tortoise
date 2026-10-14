@@ -1,0 +1,4 @@
+#!/bin/sh
+# Runs the tortoise command-line tool from this repository, whatever folder it is called from.
+here=$(cd "$(dirname "$0")/.." && pwd)
+PYTHONPATH="$here${PYTHONPATH:+:$PYTHONPATH}" exec "${PYTHON:-python3}" -m tortoise "$@"
