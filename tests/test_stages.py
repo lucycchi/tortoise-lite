@@ -45,6 +45,8 @@ def move_to(root, stage):
         except ValueError:
             if state(root)["stage"] == "plan":
                 (root / "docs" / "PLAN.md").write_text(PLAN)
+            if state(root)["stage"] == "gate":
+                run_gate(root)
             approve(root, today="2026-10-14")
             advance(root)
 
