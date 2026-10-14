@@ -25,7 +25,7 @@ The previous version grew from 5,090 to 24,895 words by accepting every review r
 
 1. **Each document stands on its own.** Every named thing is described where it appears, for example "the lab results table, which stores one row for each test result".
 2. **Each document ends with a glossary** of terms a junior software engineer might not know.
-3. **Plain English, no pseudocode.** Real names of files, functions and tables may appear, each explained in a sentence.
+3. **Plain English, no pseudocode.** Real names of files, functions and tables may appear, each explained in a sentence. A plan may include real code, at most about a tenth of its lines, each block explained in plain English.
 
 ## 4. The stages
 
@@ -37,7 +37,7 @@ The previous version grew from 5,090 to 24,895 words by accepting every review r
 | 3. Architecture | Design the system and draw its diagrams; in an existing codebase, first draw how it works today | `engineering:system-design`, or `feature-dev:code-architect` inside an existing codebase | `ARCHITECTURE.md` with diagrams | Yes |
 | 4. Plan | Break the work into numbered milestones of a few tasks each; each task is a checkbox line such as "- [ ] Task 3: chart the results. Requirements: R2" | Superpowers `writing-plans` | `PLAN.md` | Yes |
 | 5. Build | For each task, write a failing test, make it pass, then tidy the code; then tick the task's box in `PLAN.md` | Superpowers test-driven development | Code and tests | No |
-| 6. Milestone gate | See section 6 | `tortoise gate`, gstack `/review`, Codex once | Gate result on the page | Yes, before the next milestone |
+| 6. Milestone gate | See section 6 | `tortoise gate`, Codex and a fresh Claude reviewer | Gate result on the page | Yes, before the next milestone |
 | 7. Final checks | Test the running product and check security; bugs are fixed test-first and the checks run once more; write or update the project's README (how to install, run and use it) | gstack `/qa` and `/cso` | Bug fixes, `FINAL_CHECKS.md` (results, fixes and the author's choices) and `README.md` | Yes; the project is done |
 
 Stages 5 and 6 repeat once per milestone in `PLAN.md`. Final checks start after the last milestone's gate is approved.
@@ -125,7 +125,7 @@ At the end of each milestone, in this order:
 
 1. `tortoise gate` runs the project's test command, which is named once in `tortoise.json`, lists any requirement in `SPEC.md` that no task in `PLAN.md` names, and lists the milestone's tasks that are not ticked.
 2. A fresh agent compares the code with `ARCHITECTURE.md` and updates the diagrams, or lists the gaps for the author.
-3. The skill runs gstack `/review` and asks Codex for one review. Both review the same changes: everything since the commit recorded at the previous gate.
+3. The skill asks Codex and a fresh Claude agent for one review each, both with `prompts/code-review.md`. (gstack `/review` needs a feature branch and remote, which Tortoise does not use.) Both review the same changes: everything since the commit recorded at the previous gate.
 4. The results, review findings and the author's choice of which findings to fix go in `docs/gates/milestone-N.md`, where N is the milestone number.
 5. `tortoise page` rebuilds `project.html`.
 6. The author looks at the page and approves with `tortoise approve`. Failing tests block the approval: the skill checks each failing test against its requirement, fixes the code, or changes the test only with the author's agreement, then re-runs the gate. `--despite-failing-tests "reason"` approves anyway and records the reason. The approval commits the work, tags the commit (such as `tortoise/milestone-1`) and records the approval and its tag in `tortoise.json`.
