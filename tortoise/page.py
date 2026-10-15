@@ -144,7 +144,7 @@ STYLE = """
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--background); color: var(--text);
   font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif; }
-main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 64px; }
 header { border-bottom: 2px solid var(--accent); margin-bottom: 24px; }
 h1 { margin: 0 0 4px; font-size: 1.9rem; }
 .stage { margin: 0 0 12px; color: var(--muted); }
@@ -197,13 +197,8 @@ try {
       showError(node, String(error.message || error).split("\\n")[0]);
     }
   }
+  // Mermaid scales each diagram down to fit the page width, never up past its natural size.
   await mermaid.run({ nodes: drawable });
-  // Keep each diagram at its natural size so its text stays readable on a phone;
-  // a diagram wider than the screen scrolls sideways inside its own box.
-  for (const svg of document.querySelectorAll("pre.mermaid svg")) {
-    svg.style.maxWidth = "none";
-    svg.setAttribute("width", svg.viewBox.baseVal.width);
-  }
 } catch (error) {
   for (const node of diagrams) {
     if (node.isConnected && !node.dataset.processed) showError(node, "the Mermaid library did not load (are you offline?)");

@@ -85,7 +85,7 @@ One web page built from the records by `tortoise page`, never edited by hand. It
 6. the milestone gates and their results;
 7. the final checks.
 
-It has light and dark themes and works on a phone. Diagrams are drawn in the browser by the Mermaid library. A diagram that fails to draw shows an error box in its place, never a blank. Record text is escaped when the page is built and Mermaid runs in its strict mode, so nothing in a record can run as script.
+It has light and dark themes and is laid out for a desktop screen, with each diagram scaled to fit the page width. Diagrams are drawn in the browser by the Mermaid library. A diagram that fails to draw shows an error box in its place, never a blank. Record text is escaped when the page is built and Mermaid runs in its strict mode, so nothing in a record can run as script.
 
 Every record with a diagram also gets its own page beside it, such as `ARCHITECTURE.html`, rebuilt with the project page. `tortoise html FILE.md` does the same for any Markdown file, in a Tortoise project or not.
 

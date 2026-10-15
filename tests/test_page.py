@@ -175,3 +175,13 @@ def test_every_record_with_diagrams_gets_its_own_page_and_the_rest_do_not(projec
 
     assert written == [docs / "ARCHITECTURE.html"]
     assert not (docs / "SPEC.html").exists()
+
+
+def test_pages_are_laid_out_for_a_desktop_screen_with_diagrams_fitted_to_the_page(tmp_path):
+    source = tmp_path / "ARCHITECTURE.md"
+    source.write_text(ARCHITECTURE)
+
+    page = build_document_page(source).read_text()
+
+    assert "main { max-width: 1200px;" in page
+    assert "maxWidth" not in page
