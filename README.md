@@ -58,6 +58,7 @@ Run each from the project's root folder.
 | `tortoise decide --settle D3` | Settles a proposed decision. Only you settle decisions. |
 | `tortoise gate` | Runs the milestone gate and writes `docs/gates/milestone-N.md`. |
 | `tortoise page` | Builds `docs/project.html`. |
+| `tortoise board` | Optional. Copies the plan's tasks onto a GitHub Project board linked to the project's own repository, one issue per task, in the columns To do, In progress, Awaiting gate and Done. The plan stays the source of truth. Needs `gh auth refresh -s project` once. |
 
 ## What a project ends up with
 

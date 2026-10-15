@@ -162,3 +162,22 @@ def test_approve_despite_failing_tests_from_the_command_line(tmp_path):
         "committed and tagged tortoise/milestone-1\n"
         "committed: docs/gates/milestone-1.md, docs/project.html, tortoise.json\n"
     )
+
+
+def test_board_warns_and_exits_cleanly_when_github_cannot_be_reached(tmp_path):
+    tortoise(tmp_path, "init", "--name", "Lab tracker", "--test-command", "pytest")
+    (tmp_path / "docs" / "PLAN.md").write_text("# Plan\n\n## Milestone 1: Records\n\n- [ ] Task 1: store results\n")
+    offline = tmp_path / "offline"
+    offline.mkdir()
+    (offline / "gh").write_text("#!/bin/sh\necho 'error connecting to api.github.com' >&2\nexit 1\n")
+    (offline / "gh").chmod(0o755)
+
+    result = subprocess.run(
+        [str(REPOSITORY / "bin" / "tortoise"), "board"],
+        cwd=tmp_path, capture_output=True, text=True,
+        env={**os.environ, "PYTHON": sys.executable, "PATH": f"{offline}{os.pathsep}{os.environ['PATH']}"},
+    )
+
+    assert result.returncode == 0
+    assert result.stderr.startswith("tortoise: warning: the progress board was not updated")
+    assert "error connecting to api.github.com" in result.stderr

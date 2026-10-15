@@ -1,4 +1,4 @@
-"""The tortoise command line: init, decide, page, stage, approve and gate.
+"""The tortoise command line: init, decide, page, stage, approve, gate and board.
 
 Every command works on the project in the current folder. A problem the user
 can fix prints one plain line to standard error and exits with code 1.
@@ -10,6 +10,7 @@ import json
 import sys
 from pathlib import Path
 
+from tortoise.board import BoardError, sync_board
 from tortoise.decisions import add_decision, question_of, settle_decision
 from tortoise.gate import run_gate
 from tortoise.page import build_page
@@ -45,6 +46,7 @@ def main(argv: list[str] | None = None) -> None:
     approve_command.add_argument("--despite-failing-tests", metavar="REASON",
                                  help="approve a gate whose tests failed, recording why")
     commands.add_parser("gate", help="run the milestone gate: tests, requirement coverage, page")
+    commands.add_parser("board", help="copy the plan's tasks onto the project's GitHub progress board")
 
     arguments = parser.parse_args(argv)
     try:
@@ -80,6 +82,14 @@ def _run(arguments: argparse.Namespace, root: Path) -> list[str]:
         return [f'added "{fields["question"]}" ({number}), proposed{replacing}']
 
     try:
+        if arguments.command == "board":
+            try:
+                return sync_board(root)
+            except BoardError as error:
+                # The board is a convenience; a GitHub problem must never stop the project's stages.
+                print(f"tortoise: warning: the progress board was not updated ({error}); "
+                      "run tortoise board again later", file=sys.stderr)
+                return []
         if arguments.command == "stage":
             if arguments.move:
                 return [f"Now at: {describe(advance(root))}"]
