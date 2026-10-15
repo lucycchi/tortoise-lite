@@ -17,7 +17,7 @@ Tortoise Lite is a Claude Code skill plus a small command-line tool. It does thr
 
 The previous version grew from 5,090 to 24,895 words by accepting every review recommendation, and spent most of its build time on per-task verifiers and retries.
 
-1. **Size limits.** This design stays under 2,700 words (raised from 2,500 on 2026-10-15 for the progress board). The `tortoise` tool stays under about 1,500 lines of Python, not counting tests.
+1. **Size limits.** This design stays under 2,800 words (raised from 2,500 on 2026-10-15 for the progress board and two Codex reviews). The `tortoise` tool stays under about 1,500 lines of Python, not counting tests.
 2. **Additions need a stated cost.** Any new feature, rule or check, whether suggested by a review, by Claude or by Codex, is proposed with what it adds: lines of code, time per milestone and new moving parts. The author approves it explicitly. "Do all the recommendations" is not applied to scope additions without that list.
 3. **One review per document.** The spec, the architecture and the plan each get at most one review unless the author asks for another.
 
@@ -36,10 +36,10 @@ The previous version grew from 5,090 to 24,895 words by accepting every review r
 | 1. Ideas | Explore the problem, who it is for, and what success means, starting from the PRD review's answered questions, or from the author's description when there is no PRD | gstack `/office-hours` | A design note and the first decisions | No |
 | 2. Spec | Turn the design note into requirements numbered R1, R2 and so on, then run one review using `prompts/spec-review.md`; the author rules on each finding | Superpowers brainstorming, then Codex with the review prompt | `SPEC.md` and `SPEC_REVIEW.md` | Yes |
 | 3. Architecture | Design the system and draw its diagrams; in an existing codebase, first draw how it works today; then one Codex review with `prompts/architecture-review.md`, and the author rules on each finding | `engineering:system-design`, or `feature-dev:code-architect` inside an existing codebase | `ARCHITECTURE.md` with diagrams, `ARCHITECTURE_REVIEW.md` | Yes |
-| 4. Plan | Break the work into numbered milestones of a few tasks each; each task is a checkbox line such as "- [ ] Task 3: chart the results. Requirements: R2" | Superpowers `writing-plans` | `PLAN.md` | Yes |
+| 4. Plan | Break the work into numbered milestones of a few tasks each; each task is a checkbox line such as "- [ ] Task 3: chart the results. Requirements: R2"; then one Codex review with `prompts/plan-review.md` (tests against requirements, contradictions, order, expected values, feasibility, risks), and the author rules on each finding | Superpowers `writing-plans`, then Codex with the review prompt | `PLAN.md`, `PLAN_REVIEW.md` | Yes |
 | 5. Build | For each task, write a failing test, make it pass, then tidy the code; then tick the task's box in `PLAN.md` | Superpowers test-driven development | Code and tests | No |
 | 6. Milestone gate | See section 6 | `tortoise gate`, Codex and a fresh Claude reviewer | Gate result on the page | Yes, before the next milestone |
-| 7. Final checks | Test the running product and check security; bugs are fixed test-first and the checks run once more; write or update the project's README (how to install, run and use it) | gstack `/qa` and `/cso` | Bug fixes, `FINAL_CHECKS.md` (results, fixes and the author's choices) and `README.md` | Yes; the project is done |
+| 7. Final checks | Test the running product and check security, with a whole-project Codex review using `prompts/final-review.md`; bugs are fixed test-first and the checks run once more; write or update the project's README (how to install, run and use it) | gstack `/qa` and `/cso`, and Codex | Bug fixes, `FINAL_REVIEW.md`, `FINAL_CHECKS.md` (results, fixes and the author's choices) and `README.md` | Yes; the project is done |
 
 Stages 5 and 6 repeat once per milestone in `PLAN.md`. Final checks start after the last milestone's gate is approved.
 

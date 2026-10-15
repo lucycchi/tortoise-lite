@@ -36,10 +36,10 @@ In a project folder that is a git repository, start Claude Code and say "use tor
 | 1. Ideas | gstack `/office-hours` explores the problem | No |
 | 2. Spec | Numbered requirements (R1, R2...), then one Codex review | Yes |
 | 3. Architecture | The design, with diagrams on the project page, then one Codex review | Yes |
-| 4. Plan | Milestones of tasks, each task a checkbox naming its requirements | Yes |
+| 4. Plan | Milestones of tasks, each task a checkbox naming its requirements, then one Codex review of the plan | Yes |
 | 5. Build | Each task built test-first, then ticked | No |
 | 6. Milestone gate | Tests, requirement coverage and unticked tasks; Codex and Claude each check the code against the architecture and review the code | Yes, per milestone |
-| 7. Final checks | QA and security checks, a final checks record and the project README | Yes; the project is done |
+| 7. Final checks | QA and security checks, a whole-project Codex review, a final checks record and the project README | Yes; the project is done |
 
 Stages 5 and 6 repeat once per milestone.
 
@@ -63,7 +63,7 @@ Run each from the project's root folder.
 
 ## What a project ends up with
 
-All in the project's `docs/` folder: `PRD_REVIEW.md`, `DESIGN.md`, `SPEC.md`, `SPEC_REVIEW.md`, `ARCHITECTURE.md`, `ARCHITECTURE_REVIEW.md`, `PLAN.md`, `DECISIONS.md`, `gates/milestone-N.md`, `FINAL_CHECKS.md` and `project.html`, plus the project's own `README.md`. Every document stands on its own, is in plain English and ends with a glossary.
+All in the project's `docs/` folder: `PRD_REVIEW.md`, `DESIGN.md`, `SPEC.md`, `SPEC_REVIEW.md`, `ARCHITECTURE.md`, `ARCHITECTURE_REVIEW.md`, `PLAN.md`, `PLAN_REVIEW.md`, `DECISIONS.md`, `gates/milestone-N.md`, `FINAL_REVIEW.md`, `FINAL_CHECKS.md` and `project.html`, plus the project's own `README.md`. Every document stands on its own, is in plain English and ends with a glossary.
 
 ## Developing Tortoise Lite
 
