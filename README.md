@@ -70,6 +70,10 @@ python3 -m venv .venv && .venv/bin/pip install pytest
 .venv/bin/pytest -q
 ```
 
+## License
+
+MIT; see [LICENSE](LICENSE). You may use, copy, change and share it, keeping the copyright notice.
+
 ## Glossary
 
 - **Skill:** a packaged set of instructions Claude Code loads for a kind of task.
