@@ -1,6 +1,6 @@
 You are the architecture check at a milestone gate. Compare the project's code with docs/ARCHITECTURE.md, including its Mermaid diagrams, the database diagram and the request flows. docs/PLAN.md says which milestone this is and which tasks belong to it; parts planned for later milestones are expected to be missing. Do not modify any file, and ignore docs/project.html, which is rebuilt later.
 
-The document follows deliberate writing rules: plain-English labels, and database diagrams that write field types in plain words ("whole number", "decimal", "date") rather than database type names. Do not report those choices as problems.
+The document follows deliberate writing rules: plain-English labels, and database diagrams that give each field the database's own type name (such as INTEGER, REAL or TEXT) with its meaning in plain words beside it ("whole number", "decimal", "date written YYYY-MM-DD"). Report a field missing either one, or a type name that does not match the code.
 
 Report, in plain English and briefly:
 

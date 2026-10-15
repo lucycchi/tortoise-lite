@@ -92,7 +92,7 @@ It has light and dark themes and works on a phone. Diagrams are drawn in the bro
 2. A sentence under each diagram says what it shows.
 3. Workflow steps are numbered, and the text uses the same numbers.
 4. No diagram has more than about twelve boxes; bigger subjects are split.
-5. Database diagrams describe each link between tables in words, such as "each lab result belongs to exactly one patient".
+5. Database diagrams give each field the database's own type name with its meaning in plain words beside it, such as `INTEGER id "whole number, given automatically"`, and describe each link between tables in words, such as "each lab result belongs to exactly one patient".
 
 ### 5.5 Which diagrams to draw
 

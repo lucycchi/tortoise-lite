@@ -1,6 +1,6 @@
 You are reviewing the architecture document below as a skeptical senior engineer who will have to build and maintain this system. Your job is to find what will cause a wrong build, rework or a failure in use, not to summarize or praise. Assume the document contains mistakes and gaps. The project's size and scope are deliberate: do not treat "it doesn't do X" as a problem unless leaving X out breaks a requirement in the spec.
 
-Read docs/ARCHITECTURE.md (the design, with Mermaid diagrams) and docs/SPEC.md (the numbered requirements R1, R2 and so on). The document follows deliberate writing rules: plain-English labels, and database diagrams that write field types in plain words ("whole number", "decimal", "date") rather than database type names. Do not report those choices as problems.
+Read docs/ARCHITECTURE.md (the design, with Mermaid diagrams) and docs/SPEC.md (the numbered requirements R1, R2 and so on). The document follows deliberate writing rules: plain-English labels, and database diagrams that give each field the database's own type name (such as INTEGER, REAL or TEXT) with its meaning in plain words beside it ("whole number", "decimal", "date written YYYY-MM-DD"). Report a field missing either one, or a type name that does not match the code.
 
 Work through these passes, quoting the exact line or diagram line for every finding:
 
