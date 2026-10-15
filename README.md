@@ -1,6 +1,6 @@
 # Tortoise Lite
 
-Tortoise Lite walks a software project through fixed stages, from reviewing the brief to final checks, using Claude Code skills that already exist (gstack, Superpowers, the built-in engineering skills and Codex). Along the way it keeps a decision log, tests the work at the end of every milestone, and builds one web page with the project's diagrams, decisions and progress for the author to review.
+Tortoise Lite walks a software project through fixed stages, from reviewing the brief to final checks, using Claude Code skills that already exist (gstack, Superpowers, the built-in engineering skills) plus Codex, OpenAI's coding agent, which checks Claude's work: the spec, the architecture, and the code at every milestone. Along the way it keeps a decision log, tests the work at the end of every milestone, and builds one web page with the project's diagrams, decisions and progress for the author to review.
 
 It has two parts:
 
@@ -35,10 +35,10 @@ In a project folder that is a git repository, start Claude Code and say "use tor
 | 0. PRD review | A skeptical review of the brief, with questions for you | No; you answer its questions |
 | 1. Ideas | gstack `/office-hours` explores the problem | No |
 | 2. Spec | Numbered requirements (R1, R2...), then one Codex review | Yes |
-| 3. Architecture | The design, with diagrams on the project page | Yes |
+| 3. Architecture | The design, with diagrams on the project page, then one Codex review | Yes |
 | 4. Plan | Milestones of tasks, each task a checkbox naming its requirements | Yes |
 | 5. Build | Each task built test-first, then ticked | No |
-| 6. Milestone gate | Tests, requirement coverage, unticked tasks, an architecture check and two code reviews | Yes, per milestone |
+| 6. Milestone gate | Tests, requirement coverage and unticked tasks; Codex and Claude each check the code against the architecture and review the code | Yes, per milestone |
 | 7. Final checks | QA and security checks, a final checks record and the project README | Yes; the project is done |
 
 Stages 5 and 6 repeat once per milestone.
@@ -61,7 +61,7 @@ Run each from the project's root folder.
 
 ## What a project ends up with
 
-All in the project's `docs/` folder: `PRD_REVIEW.md`, `DESIGN.md`, `SPEC.md`, `SPEC_REVIEW.md`, `ARCHITECTURE.md`, `PLAN.md`, `DECISIONS.md`, `gates/milestone-N.md`, `FINAL_CHECKS.md` and `project.html`, plus the project's own `README.md`. Every document stands on its own, is in plain English and ends with a glossary.
+All in the project's `docs/` folder: `PRD_REVIEW.md`, `DESIGN.md`, `SPEC.md`, `SPEC_REVIEW.md`, `ARCHITECTURE.md`, `ARCHITECTURE_REVIEW.md`, `PLAN.md`, `DECISIONS.md`, `gates/milestone-N.md`, `FINAL_CHECKS.md` and `project.html`, plus the project's own `README.md`. Every document stands on its own, is in plain English and ends with a glossary.
 
 ## Developing Tortoise Lite
 
