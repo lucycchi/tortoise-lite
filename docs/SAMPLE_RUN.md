@@ -26,6 +26,8 @@ From running a made-up project ("lab trend tracker") through every stage on 2026
 22. TOOL BUG (fixed, test added): approving final checks committed only docs/ and tortoise.json, leaving the README and any QA fixes uncommitted. Now commits all work, like a gate.
 23. Two reviewers found different real bugs at both gates (Codex: infinity values, stale page; Claude: non-ASCII digits, uneven-average 10%). Evidence for keeping two reviewers.
 
+24. Trial of the new architecture prompts on the finished sample: Codex's architecture review caught, from the design alone, the floating-point 10% problem and the argparse exit-code problem that the real run only found at the gates, plus a missing index for the one-second target. Codex's architecture check caught a code-versus-design mismatch the Claude check missed (the database is opened before input is checked). Both prompts now say that plain-word field types in database diagrams are deliberate.
+
 ## Glossary
 
 - **Glue:** the instructions that make one skill hand its output to the next in the form Tortoise expects.
