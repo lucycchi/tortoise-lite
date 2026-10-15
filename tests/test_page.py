@@ -1,7 +1,7 @@
 import pytest
 
 from tortoise.decisions import add_decision, settle_decision
-from tortoise.page import build_page
+from tortoise.page import build_diagram_pages, build_document_page, build_page
 from tortoise.project import init_project
 
 ARCHITECTURE = """# Architecture
@@ -143,3 +143,35 @@ def test_page_without_a_plan_says_so(project):
     assert "The plan is not written yet." in page
     assert "The requirements are not written yet." in page
     assert "Final checks have not run yet." in page
+
+
+def test_a_document_page_is_written_beside_its_source_with_diagrams_drawn(tmp_path):
+    source = tmp_path / "ARCHITECTURE.md"
+    source.write_text(ARCHITECTURE.replace("# Architecture", "# Lab <tracker> architecture"))
+
+    path = build_document_page(source)
+
+    page = path.read_text()
+    assert path == tmp_path / "ARCHITECTURE.html"
+    assert "<title>Lab &lt;tracker&gt; architecture</title>" in page
+    assert '<pre class="mermaid">graph TD' in page
+    assert "Clinicians lose time finding lab trends." in page
+    assert 'securityLevel: "strict"' in page
+
+
+def test_a_document_without_a_heading_is_titled_by_its_file_name(tmp_path):
+    source = tmp_path / "flows.md"
+    source.write_text("```mermaid\ngraph TD\n  A --> B\n```\n")
+
+    assert "<title>flows</title>" in build_document_page(source).read_text()
+
+
+def test_every_record_with_diagrams_gets_its_own_page_and_the_rest_do_not(project):
+    docs = project / "docs"
+    (docs / "ARCHITECTURE.md").write_text(ARCHITECTURE)
+    (docs / "SPEC.md").write_text("# Spec\n\n- R1: store lab results\n")
+
+    written = build_diagram_pages(docs)
+
+    assert written == [docs / "ARCHITECTURE.html"]
+    assert not (docs / "SPEC.html").exists()

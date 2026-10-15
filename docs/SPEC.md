@@ -87,6 +87,8 @@ One web page built from the records by `tortoise page`, never edited by hand. It
 
 It has light and dark themes and works on a phone. Diagrams are drawn in the browser by the Mermaid library. A diagram that fails to draw shows an error box in its place, never a blank. Record text is escaped when the page is built and Mermaid runs in its strict mode, so nothing in a record can run as script.
 
+Every record with a diagram also gets its own page beside it, such as `ARCHITECTURE.html`, rebuilt with the project page. `tortoise html FILE.md` does the same for any Markdown file, in a Tortoise project or not.
+
 ### 5.4 Diagram rules
 
 1. Labels and arrows are plain English a junior engineer can follow. Every arrow says what moves along it.
@@ -143,6 +145,7 @@ Plain Python 3, standard library only, with pytest for its own tests.
 | `tortoise decide` | Adds a decision log entry from a short form, or replaces an earlier one |
 | `tortoise gate` | Runs the milestone gate (section 6) |
 | `tortoise page` | Builds `project.html` |
+| `tortoise html` | Writes any Markdown file as a page beside it, with its diagrams drawn |
 | `tortoise board` | Copies the plan's tasks onto the project's progress board (section 7.1) |
 
 The skill, `SKILL.md`, tells Claude Code which skill to run at each stage and when to call the tool.

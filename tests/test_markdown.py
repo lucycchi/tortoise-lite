@@ -79,3 +79,22 @@ def test_task_checkboxes():
         '<li class="task"><span class="box" aria-label="not done"></span><span>Task 2: chart</span></li>\n'
         "</ul>"
     )
+
+
+def test_quoted_lines_become_one_quote_block_with_their_own_formatting():
+    text = "> **Status.** Built and tested.\n> See [the plan](PLAN.md).\n\nAfter."
+
+    assert to_html(text) == (
+        '<blockquote>\n<p><strong>Status.</strong> Built and tested. See <a href="PLAN.md">the plan</a>.</p>\n'
+        "</blockquote>\n<p>After.</p>"
+    )
+
+
+def test_a_line_of_three_dashes_or_stars_is_a_horizontal_rule():
+    assert to_html("Above\n\n---\n\nBelow\n\n***") == "<p>Above</p>\n<hr>\n<p>Below</p>\n<hr>"
+
+
+def test_single_stars_are_italics_and_double_stars_stay_bold():
+    assert to_html("the *category* and **bold** and 2 * 3 * 4") == (
+        "<p>the <em>category</em> and <strong>bold</strong> and 2 * 3 * 4</p>"
+    )

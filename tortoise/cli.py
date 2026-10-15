@@ -1,4 +1,4 @@
-"""The tortoise command line: init, decide, page, stage, approve, gate and board.
+"""The tortoise command line: init, decide, page, stage, approve, gate, board and html.
 
 Every command works on the project in the current folder. A problem the user
 can fix prints one plain line to standard error and exits with code 1.
@@ -13,7 +13,7 @@ from pathlib import Path
 from tortoise.board import BoardError, sync_board
 from tortoise.decisions import add_decision, question_of, settle_decision
 from tortoise.gate import run_gate
-from tortoise.page import build_page
+from tortoise.page import build_diagram_pages, build_document_page, build_page
 from tortoise.plan import read_milestones
 from tortoise.project import init_project, load_state
 from tortoise.stages import advance, approve, committed_files, describe, stage_name
@@ -46,6 +46,8 @@ def main(argv: list[str] | None = None) -> None:
     approve_command.add_argument("--despite-failing-tests", metavar="REASON",
                                  help="approve a gate whose tests failed, recording why")
     commands.add_parser("gate", help="run the milestone gate: tests, requirement coverage, page")
+    html_command = commands.add_parser("html", help="write a Markdown file as a page beside it, with its diagrams drawn")
+    html_command.add_argument("files", nargs="+", type=Path)
     commands.add_parser("board", help="copy the plan's tasks onto the project's GitHub progress board")
 
     arguments = parser.parse_args(argv)
@@ -63,6 +65,15 @@ def _run(arguments: argparse.Namespace, root: Path) -> list[str]:
         return [f"created {name}" for name in result["created"]] + [
             f"kept {name} (already exists)" for name in result["kept"]
         ]
+
+    if arguments.command == "html":
+        # Works on any Markdown file, in a Tortoise project or not.
+        for source in arguments.files:
+            if not source.exists():
+                raise UserError(f"{source} does not exist")
+            if source.suffix != ".md":
+                raise UserError(f"{source} is not a Markdown (.md) file")
+        return [f"wrote {_shown(build_document_page(root / source), root)}" for source in arguments.files]
 
     if not (root / "tortoise.json").exists():
         raise UserError("no tortoise.json here; run tortoise init first")
@@ -119,8 +130,13 @@ def _run(arguments: argparse.Namespace, root: Path) -> list[str]:
     except ValueError as error:
         raise UserError(str(error)) from error
 
-    path = build_page(root)
-    return [f"wrote {path.relative_to(root)}"]
+    paths = [build_page(root), *build_diagram_pages(root / "docs")]
+    return [f"wrote {path.relative_to(root)}" for path in paths]
+
+
+def _shown(path: Path, root: Path) -> Path:
+    """A path relative to the current folder when it is inside it, otherwise as given."""
+    return path.relative_to(root) if path.is_relative_to(root) else path
 
 
 def _read_form(path: Path) -> dict:

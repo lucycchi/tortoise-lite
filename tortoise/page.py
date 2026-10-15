@@ -1,7 +1,8 @@
 """Building the project page, docs/project.html, from the project's records.
 
 The page is generated, never edited by hand: summary, architecture, decisions,
-then the milestone gates.
+then the milestone gates. Any Markdown document can also get its own page, written
+beside it, so its diagrams can be viewed in a browser.
 """
 
 import html
@@ -43,6 +44,23 @@ def build_page(root: Path) -> Path:
     path = docs / "project.html"
     write_safely(path, PAGE.format(title=name, body=body, style=STYLE, script=SCRIPT.replace("MERMAID_URL", MERMAID_URL)))
     return path
+
+
+def build_document_page(source: Path) -> Path:
+    """Write one Markdown document as a page beside it (same name, .html), with its diagrams drawn."""
+    text = source.read_text()
+    heading = re.search(r"^# (.+)$", text, re.MULTILINE)
+    title = html.escape(heading.group(1).strip() if heading else source.stem)
+    path = source.with_suffix(".html")
+    write_safely(path, PAGE.format(title=title, body=to_html(text), style=STYLE,
+                                   script=SCRIPT.replace("MERMAID_URL", MERMAID_URL)))
+    return path
+
+
+def build_diagram_pages(docs: Path) -> list[Path]:
+    """A page for every record in docs/ that has a diagram, so each can be viewed on its own."""
+    return [build_document_page(source) for source in sorted(docs.glob("*.md"))
+            if "```mermaid" in source.read_text()]
 
 
 def _read(path: Path) -> str:

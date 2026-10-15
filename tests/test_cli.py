@@ -77,6 +77,36 @@ def test_page_prints_where_it_wrote_the_page(tmp_path):
     assert (tmp_path / "docs" / "project.html").exists()
 
 
+def test_page_also_writes_a_page_for_each_record_with_diagrams(tmp_path):
+    tortoise(tmp_path, "init", "--name", "Lab tracker", "--test-command", "pytest")
+    (tmp_path / "docs" / "ARCHITECTURE.md").write_text("# Architecture\n\n```mermaid\ngraph TD\n  A --> B\n```\n")
+
+    result = tortoise(tmp_path, "page")
+
+    assert (result.returncode, result.stdout) == (0, "wrote docs/project.html\nwrote docs/ARCHITECTURE.html\n")
+
+
+def test_html_renders_any_markdown_file_without_a_tortoise_project(tmp_path):
+    (tmp_path / "THREAT_MODEL.md").write_text("# Threat model\n\n```mermaid\ngraph TD\n  A --> B\n```\n")
+    (tmp_path / "notes").mkdir()
+    (tmp_path / "notes" / "flows.md").write_text("# Flows\n")
+
+    result = tortoise(tmp_path, "html", "THREAT_MODEL.md", "notes/flows.md")
+
+    assert (result.returncode, result.stdout) == (0, "wrote THREAT_MODEL.html\nwrote notes/flows.html\n")
+    assert (tmp_path / "notes" / "flows.html").exists()
+
+
+def test_html_refuses_a_missing_or_non_markdown_file(tmp_path):
+    (tmp_path / "page.txt").write_text("hello")
+
+    missing = tortoise(tmp_path, "html", "nowhere.md")
+    not_markdown = tortoise(tmp_path, "html", "page.txt")
+
+    assert (missing.returncode, missing.stderr) == (1, "tortoise: nowhere.md does not exist\n")
+    assert (not_markdown.returncode, not_markdown.stderr) == (1, "tortoise: page.txt is not a Markdown (.md) file\n")
+
+
 def test_an_unreadable_decision_form_is_a_plain_error(tmp_path):
     tortoise(tmp_path, "init", "--name", "Lab tracker", "--test-command", "pytest")
     (tmp_path / "broken.json").write_text("{not json")

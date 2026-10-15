@@ -1,7 +1,7 @@
 """A small Markdown-to-HTML converter for the project's records.
 
-It covers only what the records use: headings, paragraphs, lists, bold, inline
-code, links, tables and fenced code blocks, with ```mermaid blocks becoming
+It covers only what the records use: headings, paragraphs, lists, bold, italics,
+inline code, links, tables, quotes, horizontal rules and fenced code blocks, with ```mermaid blocks becoming
 diagrams. All record text is escaped, so nothing in a record can run as script.
 """
 
@@ -14,6 +14,8 @@ TABLE_SEPARATOR = re.compile(r"^\|?\s*:?-{3,}")
 CODE_SPAN = re.compile(r"`([^`]+)`")
 LINK = re.compile(r"\[([^\]]+)\]\(([^()\n]*(?:\([^()\n]*\)[^()\n]*)*)\)")
 BOLD = re.compile(r"\*\*(.+?)\*\*")
+ITALIC = re.compile(r"(?<![*\w])\*(?=\S)([^*\n]+?)(?<=\S)\*(?![*\w])")
+RULE = re.compile(r"^(-{3,}|\*{3,}|_{3,})\s*$")
 TASK_BOX = re.compile(r"^\[([ xX])\] (.*)$")
 # A link is kept only if it is a web address, a same-page anchor or a plain relative path.
 SAFE_URL = re.compile(r"^(https?://[^\s\"'<>`]+|#[\w-]+|[\w./-]+)$")
@@ -38,6 +40,16 @@ def to_html(text: str, heading_offset: int = 0) -> str:
             else:
                 blocks.append(f"<pre><code>{body}</code></pre>")
             i = end + 1
+        elif RULE.match(line):
+            blocks.append("<hr>")
+            i += 1
+        elif line.startswith(">"):
+            end = i
+            while end < len(lines) and lines[end].startswith(">"):
+                end += 1
+            quoted = "\n".join(part[1:].removeprefix(" ") for part in lines[i:end])
+            blocks.append(f"<blockquote>\n{to_html(quoted, heading_offset)}\n</blockquote>")
+            i = end
         elif match := HEADING.match(line):
             level = min(len(match.group(1)) + heading_offset, 6)
             blocks.append(f"<h{level}>{_inline(match.group(2))}</h{level}>")
@@ -66,7 +78,7 @@ def to_html(text: str, heading_offset: int = 0) -> str:
 
 
 def _starts_block(line: str) -> bool:
-    return bool(line.startswith(("```", "|")) or HEADING.match(line) or LIST_ITEM.match(line))
+    return bool(line.startswith(("```", "|", ">")) or HEADING.match(line) or LIST_ITEM.match(line) or RULE.match(line))
 
 
 def _list(items: list[tuple[int, bool, str]], start: int = 0) -> tuple[str, int]:
@@ -129,4 +141,5 @@ def _links(text: str) -> str:
 
 
 def _bold(text: str) -> str:
-    return BOLD.sub(r"<strong>\1</strong>", html.escape(text, quote=False))
+    bold = BOLD.sub(r"<strong>\1</strong>", html.escape(text, quote=False))
+    return ITALIC.sub(r"<em>\1</em>", bold)

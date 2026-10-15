@@ -9,7 +9,7 @@ import re
 import subprocess
 from pathlib import Path
 
-from tortoise.page import build_page
+from tortoise.page import build_diagram_pages, build_page
 from tortoise.plan import read_milestones
 from tortoise.project import load_state, save_state, write_safely
 from tortoise.stages import code_fingerprint, mark_new_files_for_review
@@ -53,6 +53,7 @@ def run_gate(root: Path) -> dict:
     state["last_gate"] = {"milestone": milestone, "passed": passed, "fingerprint": code_fingerprint(root)}
     save_state(root, state)
     build_page(root)
+    build_diagram_pages(root / "docs")
     return {"passed": passed, "exit_code": run.returncode, "review_base": review_base, "path": path,
             "new_files": new_files}
 
