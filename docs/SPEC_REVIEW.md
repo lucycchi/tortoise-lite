@@ -1,4 +1,4 @@
-I reviewed [SPEC.md](/home/lucyc/tortoise-lite/docs/SPEC.md) against the referenced [PRD-review prompt](/home/lucyc/tortoise-lite/prompts/prd-review.md). The prompt is not a PRD, so traceability does not apply.
+I reviewed [SPEC.md](docs/SPEC.md) against the referenced [PRD-review prompt](prompts/prd-review.md). The prompt is not a PRD, so traceability does not apply.
 
 ## Top 5 issues
 
