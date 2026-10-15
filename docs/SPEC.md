@@ -17,7 +17,7 @@ Tortoise Lite is a Claude Code skill plus a small command-line tool. It does thr
 
 The previous version grew from 5,090 to 24,895 words by accepting every review recommendation, and spent most of its build time on per-task verifiers and retries.
 
-1. **Size limits.** This design stays under 2,500 words. The `tortoise` tool stays under about 1,500 lines of Python, not counting tests.
+1. **Size limits.** This design stays under 2,700 words (raised from 2,500 on 2026-10-15 for the progress board). The `tortoise` tool stays under about 1,500 lines of Python, not counting tests.
 2. **Additions need a stated cost.** Any new feature, rule or check, whether suggested by a review, by Claude or by Codex, is proposed with what it adds: lines of code, time per milestone and new moving parts. The author approves it explicitly. "Do all the recommendations" is not applied to scope additions without that list.
 3. **One review per document.** The spec, the architecture and the plan each get at most one review unless the author asks for another.
 
@@ -143,8 +143,20 @@ Plain Python 3, standard library only, with pytest for its own tests.
 | `tortoise decide` | Adds a decision log entry from a short form, or replaces an earlier one |
 | `tortoise gate` | Runs the milestone gate (section 6) |
 | `tortoise page` | Builds `project.html` |
+| `tortoise board` | Copies the plan's tasks onto the project's progress board (section 7.1) |
 
 The skill, `SKILL.md`, tells Claude Code which skill to run at each stage and when to call the tool.
+
+### 7.1 The progress board (optional)
+
+If the author wants one when the plan is approved, `tortoise board` creates a GitHub Project linked to the project's repository, then the author adds a board view by hand (GitHub cannot create views for a tool). Each task becomes an issue titled by what it is, such as "Chart the results (Task 3)", under a GitHub milestone named after its plan milestone; `tortoise.json` records the board and which issue is which task. Card statuses:
+
+- **To do:** in a later milestone.
+- **In progress:** in the current milestone, not ticked.
+- **Awaiting gate:** ticked; the gate is not approved.
+- **Done:** the gate is approved; the issue is closed.
+
+`PLAN.md` stays the only source of truth: moving a card changes nothing. The skill runs `tortoise board` after each ticked task and approval, using the `gh` tool; if GitHub is unreachable it warns and never blocks a stage.
 
 ## 8. How it is built
 
@@ -156,7 +168,7 @@ Test-first with the Superpowers test-driven-development skill, in one Claude Cod
 
 ## 9. Out of scope
 
-Hidden and locked tests, mutation testing, judges, per-task verifiers, cross-company roles per task, secret scanning, a term list, cost tracking and sandboxed rendering.
+Hidden and locked tests, mutation testing, judges, per-task verifiers, cross-company roles per task, secret scanning, a term list, cost tracking, sandboxed rendering, and copying board changes back into the plan.
 
 ## Glossary
 
@@ -170,3 +182,5 @@ Hidden and locked tests, mutation testing, judges, per-task verifiers, cross-com
 - **Gate:** a check at the end of a milestone that must be looked at before work continues.
 - **PRD (product requirements document):** the brief, usually from a product manager (PM), describing what to build and why.
 - **Pytest:** the standard Python tool for running tests.
+- **GitHub Project:** a GitHub planning board whose cards are issues; a board view shows them in status columns.
+- **Issue:** a GitHub record of one piece of work, which can be linked to commits and closed when done.
