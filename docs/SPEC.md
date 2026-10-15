@@ -26,6 +26,7 @@ The previous version grew from 5,090 to 24,895 words by accepting every review r
 1. **Each document stands on its own.** Every named thing is described where it appears, for example "the lab results table, which stores one row for each test result".
 2. **Each document ends with a glossary** of terms a junior software engineer might not know.
 3. **Plain English, no pseudocode.** Real names of files, functions and tables may appear, each explained in a sentence. A plan may include real code, at most about a tenth of its lines, each block explained in plain English.
+4. **No bare codes.** A requirement, task, decision, milestone or finding is named by what it is, with its code in parentheses after it: "the export button that saves a PDF (R3)", never "R3" alone. This holds in documents, diagram labels, review findings, messages to the author and the tool's own output.
 
 ## 4. The stages
 

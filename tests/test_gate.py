@@ -70,8 +70,8 @@ def test_requirement_coverage_lists_both_kinds_of_gap(tmp_path):
     coverage = gate.read_text().split("## Requirement coverage")[1].split("## ")[0]
     assert coverage == (
         "\n\n"
-        "- R3 is in SPEC.md but no task in PLAN.md names it.\n"
-        "- R9 is named by a task in PLAN.md but is not in SPEC.md.\n"
+        "- \"export a PDF\" (R3) is in SPEC.md but no task in PLAN.md names it.\n"
+        "- An unknown requirement (R9) is named by \"Task 2: chart them\" in PLAN.md but is not in SPEC.md.\n"
         "\n"
     )
 

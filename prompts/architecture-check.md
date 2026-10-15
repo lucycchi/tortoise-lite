@@ -8,4 +8,4 @@ Report, in plain English and briefly:
 2. Anything this milestone's tasks should have built that the document describes but the code does not have.
 3. Anything the code does that the document does not mention and a reader of the document would need to know.
 
-Quote the file and line for every point. Write "none found" for an empty item. Keep it under 400 words.
+Quote the file and line for every point. Write "none found" for an empty item. Keep it under 400 words. Name every requirement, task or part by what it is, with any code in parentheses after it, never by a bare code.

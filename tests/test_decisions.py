@@ -99,8 +99,9 @@ def test_replacing_marks_the_old_entry_and_links_the_new_one(log):
     text = log.read_text()
     old, new = text.split("## D2: ")
     assert number == "D2"
-    assert "- **Status:** replaced by D2\n" in old
-    assert "- **Status:** proposed\n- **Replaces:** D1\n" in new
+    question = DATABASE_DECISION["question"]
+    assert f'- **Status:** replaced by "{question}" (D2)\n' in old
+    assert f'- **Status:** proposed\n- **Replaces:** "{question}" (D1)\n' in new
 
 
 def test_replacing_an_unknown_number_changes_nothing(log):

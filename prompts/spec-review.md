@@ -33,3 +33,4 @@ Rules:
 - No more than 3 ADDITION findings in total. If you have more, keep the 3 with the worst consequence of leaving them out and list the rest by title only.
 - Do not rewrite the spec or suggest wording unless a line cannot work as written.
 - Do not recommend extra review rounds, extra approval steps or extra checks on the process itself unless a specific finding requires one.
+- Name every requirement, decision, task or finding by what it is, with its code in parentheses after it, such as "the export button that saves a PDF (R3)", never "R3" alone. Give each of your own findings a short title and put any number you assign after the title, never before it.

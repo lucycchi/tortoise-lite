@@ -16,6 +16,8 @@ from tortoise.stages import code_fingerprint, mark_new_files_for_review
 
 OUTPUT_LINES_KEPT = 30
 REQUIREMENT = re.compile(r"\bR(\d+)\b")
+REQUIREMENT_ITEM = re.compile(r"^\s*[-*] R(\d+):\s*(.*)$", re.MULTILINE)
+LIST_MARKER = re.compile(r"^\s*[-*]\s*(\[[ xX]\]\s*)?")
 SKILL_SECTIONS = "## Architecture check\n\nNot recorded yet.\n\n## Reviews\n\nNot recorded yet.\n\n## Author's choices\n\nNot recorded yet.\n"
 
 
@@ -60,15 +62,29 @@ def _coverage(root: Path) -> str:
     spec = _read(root / "docs" / "SPEC.md")
     plan = _read(root / "docs" / "PLAN.md")
     in_spec = {int(number) for number in REQUIREMENT.findall(spec)}
-    named = set()
+    texts = {int(number): text.strip() for number, text in REQUIREMENT_ITEM.findall(spec)}
+    tasks: dict[int, list[str]] = {}
     for line in plan.split("\n"):
         if "Requirements:" in line:
-            named.update(int(number) for number in REQUIREMENT.findall(line.split("Requirements:", 1)[1]))
-    gaps = [f"- R{number} is in SPEC.md but no task in PLAN.md names it." for number in sorted(in_spec - named)]
-    gaps += [f"- R{number} is named by a task in PLAN.md but is not in SPEC.md." for number in sorted(named - in_spec)]
+            task, numbers = line.split("Requirements:", 1)
+            for number in REQUIREMENT.findall(numbers):
+                tasks.setdefault(int(number), []).append(LIST_MARKER.sub("", task).strip().rstrip("."))
+    gaps = [f"- {_requirement(number, texts)} is in SPEC.md but no task in PLAN.md names it."
+            for number in sorted(in_spec - tasks.keys())]
+    gaps += [f"- An unknown requirement (R{number}) is named by {_quoted(tasks[number])} in PLAN.md "
+             "but is not in SPEC.md." for number in sorted(tasks.keys() - in_spec)]
     if not gaps:
         return "Every requirement in SPEC.md is named by a task in PLAN.md.\n"
     return "\n".join(gaps) + "\n"
+
+
+def _requirement(number: int, texts: dict[int, str]) -> str:
+    """A requirement by its text first, with its number in parentheses."""
+    return f'"{texts[number]}" (R{number})' if texts.get(number) else f"Requirement R{number}"
+
+
+def _quoted(names: list[str]) -> str:
+    return ", ".join(f'"{name}"' for name in names)
 
 
 def _unticked_tasks(root: Path, number: int) -> str:

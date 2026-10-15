@@ -43,11 +43,12 @@ def test_decide_adds_settles_and_replaces(tmp_path):
     settled = tortoise(tmp_path, "decide", "--settle", "D1")
     replaced = tortoise(tmp_path, "decide", "--from", str(form), "--replaces", "D1")
 
-    assert (added.returncode, added.stdout) == (0, "added D1 (proposed)\n")
-    assert (settled.returncode, settled.stdout) == (0, "settled D1\n")
-    assert (replaced.returncode, replaced.stdout) == (0, "added D2 (proposed), replacing D1\n")
+    assert (added.returncode, added.stdout) == (0, 'added "Which database?" (D1), proposed\n')
+    assert (settled.returncode, settled.stdout) == (0, 'settled "Which database?" (D1)\n')
+    assert (replaced.returncode, replaced.stdout) == (
+        0, 'added "Which database?" (D2), proposed, replacing "Which database?" (D1)\n')
     log = (tmp_path / "docs" / "DECISIONS.md").read_text()
-    assert "- **Status:** replaced by D2\n" in log
+    assert '- **Status:** replaced by "Which database?" (D2)\n' in log
 
 
 def test_errors_are_plain_messages_with_exit_code_1(tmp_path):

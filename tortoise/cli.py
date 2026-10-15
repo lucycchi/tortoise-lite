@@ -10,7 +10,7 @@ import json
 import sys
 from pathlib import Path
 
-from tortoise.decisions import add_decision, settle_decision
+from tortoise.decisions import add_decision, question_of, settle_decision
 from tortoise.gate import run_gate
 from tortoise.page import build_page
 from tortoise.plan import read_milestones
@@ -70,13 +70,14 @@ def _run(arguments: argparse.Namespace, root: Path) -> list[str]:
         try:
             if arguments.settle:
                 settle_decision(log, arguments.settle)
-                return [f"settled {arguments.settle}"]
+                return [f'settled "{question_of(log, arguments.settle)}" ({arguments.settle})']
             fields = _read_form(arguments.form)
             number = add_decision(log, fields, datetime.date.today().isoformat(), replaces=arguments.replaces)
         except ValueError as error:
             raise UserError(str(error)) from error
-        replacing = f", replacing {arguments.replaces}" if arguments.replaces else ""
-        return [f"added {number} (proposed){replacing}"]
+        replacing = (f', replacing "{question_of(log, arguments.replaces)}" ({arguments.replaces})'
+                     if arguments.replaces else "")
+        return [f'added "{fields["question"]}" ({number}), proposed{replacing}']
 
     try:
         if arguments.command == "stage":

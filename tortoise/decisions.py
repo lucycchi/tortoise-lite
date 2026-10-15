@@ -21,9 +21,10 @@ def add_decision(log: Path, fields: dict, today: str, replaces: str | None = Non
     text = log.read_text()
     numbers = [int(found) for found in ENTRY_HEADING.findall(text)]
     number = f"D{max(numbers, default=0) + 1}"
-    entry = _format_entry(number, fields, today, replaces)
+    replaced = f'"{_question(text, replaces)}" ({replaces})' if replaces else None
+    entry = _format_entry(number, fields, today, replaced)
     if replaces:
-        text = _set_status(text, replaces, f"replaced by {number}")
+        text = _set_status(text, replaces, f'replaced by "{fields["question"]}" ({number})')
 
     glossary_at = text.rindex(GLOSSARY_HEADING)
     glossary = _merge_glossary(text[glossary_at + len(GLOSSARY_HEADING):], terms)
@@ -103,6 +104,16 @@ def _entry_span(text: str, number: str) -> tuple[int, int]:
         raise ValueError(f"no decision {number} in the log")
     end = text.find("\n## ", start)
     return start, len(text) if end == -1 else end
+
+
+def question_of(log: Path, number: str) -> str:
+    """The plain-English question a decision answers, so messages can name it, not just number it."""
+    return _question(log.read_text(), number)
+
+
+def _question(text: str, number: str) -> str:
+    start, _ = _entry_span(text, number)
+    return text[start:text.index("\n", start)].split(": ", 1)[1]
 
 
 def _status(text: str, number: str) -> str:

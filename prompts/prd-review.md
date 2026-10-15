@@ -23,4 +23,4 @@ Output format:
 - Then the full findings grouped by pass.
 - Then a list of clarifying questions to send the PM, ordered by how much the answer would change the design.
 
-Rules: Do not invent issues to fill a category; write "none found" if so. Distinguish clearly between "definitely wrong" and "unclear, needs confirmation." Don't suggest solutions unless the PRD's approach is unworkable.
+Rules: Do not invent issues to fill a category; write "none found" if so. Distinguish clearly between "definitely wrong" and "unclear, needs confirmation." Don't suggest solutions unless the PRD's approach is unworkable. Name every requirement or finding by what it is, with any code in parentheses after it, never by a bare code; give each of your findings a short title and put any number you assign after the title.

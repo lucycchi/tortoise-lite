@@ -21,7 +21,7 @@ From running a made-up project ("lab trend tracker") through every stage on 2026
 17. TOOL BUG (fixed in tortoise-lite, test added): `git diff <review base>` hid every NEW file, because they stay untracked until approval. The gate now marks new non-ignored, non-secret files with git add --intent-to-add, so both reviewers see the milestone's code.
 18. gstack /review does not fit the gate: it needs an origin remote and a feature branch (diffs against the default branch's merge-base and stops on main). Tortoise works on main with tags. Sample used a fresh Claude agent with prompts/code-review.md as the second reviewer. NEEDS THE AUTHOR'S CALL (spec change).
 19. tortoise gate rebuilds the page at step 1, before the architecture check updates docs, so reviewers saw a stale page summary. SKILL.md step 6 rebuilds before approval; reviewers should be told the page is rebuilt last (or ignore project.html).
-20. The spec changed during the build (R8 display rule) with no re-approval; the requirement-change loop was cut for scope. Known gap.
+20. The spec's display rule (R8) changed during the build with no re-approval; the requirement-change loop was cut for scope. Known gap.
 21. /cso is protocol-driven (helper, 10-minute budget, JSON submissions, challenge pass; runtime scanners need Docker). Heavy for small projects. Not run fully on the sample. NEEDS THE AUTHOR'S CALL.
 22. TOOL BUG (fixed, test added): approving final checks committed only docs/ and tortoise.json, leaving the README and any QA fixes uncommitted. Now commits all work, like a gate.
 23. Two reviewers found different real bugs at both gates (Codex: infinity values, stale page; Claude: non-ASCII digits, uneven-average 10%). Evidence for keeping two reviewers.

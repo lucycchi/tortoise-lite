@@ -16,3 +16,4 @@ Rules:
 - No more than 3 ADDITION findings.
 - Do not comment on style, naming or formatting.
 - Do not suggest features the spec leaves out of scope.
+- Name every requirement, decision, task or finding by what it is, with its code in parentheses after it, such as "the export button that saves a PDF (R3)", never "R3" alone. Give each of your own findings a short title and put any number you assign after the title, never before it.

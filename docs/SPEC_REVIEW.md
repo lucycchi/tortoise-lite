@@ -76,7 +76,7 @@ I reviewed [SPEC.md](docs/SPEC.md) against the referenced [PRD-review prompt](pr
 
 ## 1. Contradictions
 
-### C1. One review versus two reviews per milestone
+### One review versus two reviews per milestone (C1)
 
 > “At the end of each milestone a gate runs the project's tests and one review…”  
 > “Then the skill runs gstack `/review` on the milestone's changes and asks Codex for one review of the same changes.”
@@ -85,7 +85,7 @@ The first line promises one review; the detailed flow specifies two independent 
 
 **Classification:** DEFINITELY WRONG
 
-### C2. Existing-codebase support conflicts with the out-of-scope list
+### Existing-codebase support conflicts with the out-of-scope list (C2)
 
 > “`feature-dev:code-architect` inside an existing codebase”  
 > “Out of scope … adopting existing projects.”
@@ -94,7 +94,7 @@ These define opposite scope boundaries.
 
 **Classification:** DEFINITELY WRONG
 
-### C3. Mandatory diagrams assume databases and screens
+### Mandatory diagrams assume databases and screens (C3)
 
 > “Every project gets these five:”  
 > “Database diagram: each table…”  
@@ -104,7 +104,7 @@ These define opposite scope boundaries.
 
 **Classification:** DEFINITELY WRONG
 
-### C4. An empty decision log violates the rule for every document
+### An empty decision log violates the rule for every document (C4)
 
 > “Each document ends with a glossary…”  
 > “`tortoise init` | Creates `docs/`, an empty decision log…”
@@ -113,7 +113,7 @@ An empty `DECISIONS.md` cannot end with a glossary or stand on its own.
 
 **Classification:** DEFINITELY WRONG
 
-### C5. “Term list” may exclude the required glossaries
+### “Term list” may exclude the required glossaries (C5)
 
 > “Each document ends with a glossary…”  
 > “Out of scope … a term list…”
@@ -124,7 +124,7 @@ Two readings are possible: “term list” means a separate centralized artifact
 
 ## 2. Ambiguity
 
-### A1. “Review” has at least three incompatible meanings
+### “Review” has at least three incompatible meanings (A1)
 
 > “One review per document.”  
 > “a fresh agent compares the code with this document and updates the diagrams”  
@@ -139,7 +139,7 @@ The author probably means the second.
 
 **Classification:** UNCLEAR
 
-### A2. Record locations and ownership are unspecified
+### Record locations and ownership are unspecified (A2)
 
 > “All records live in the project's `docs/` folder.”  
 > “The approval is a line in the journal section of `tortoise.json`.”  
@@ -154,7 +154,7 @@ The author probably means root-level `tortoise.json`, but that contradicts the o
 
 **Classification:** UNCLEAR
 
-### A3. The decision command has no usable interface contract
+### The decision command has no usable interface contract (A3)
 
 > “`tortoise decide` | Adds a decision log entry from a short form, or replaces an earlier one”
 
@@ -167,7 +167,7 @@ The author probably means root-level `tortoise.json`, but that contradicts the o
 
 **Classification:** UNCLEAR
 
-### A4. Test-command execution semantics are undefined
+### Test-command execution semantics are undefined (A4)
 
 > “Runs the project's test command, which is named once in `tortoise.json`…”
 
@@ -180,7 +180,7 @@ The author probably means a shell command from the project root. Working directo
 
 **Classification:** UNCLEAR
 
-### A5. Spec-review findings have no disposition model
+### Spec-review findings have no disposition model (A5)
 
 > “the author rules on each finding”
 
@@ -193,7 +193,7 @@ The author probably means explicit rulings, because decisions that change the bu
 
 **Classification:** UNCLEAR
 
-### A6. Architecture divergence handling is discretionary
+### Architecture divergence handling is discretionary (A6)
 
 > “updates the diagrams, or lists the gaps for the author.”
 
@@ -206,7 +206,7 @@ Which artifact wins is a material design decision. No decision rule is given.
 
 **Classification:** UNCLEAR
 
-### A7. “Works on a phone” has no delivery meaning
+### “Works on a phone” has no delivery meaning (A7)
 
 > “It has light and dark themes and works on a phone.”
 
@@ -219,7 +219,7 @@ The author probably means responsive layout, but the spec defines neither a serv
 
 **Classification:** UNCLEAR
 
-### A8. “Important user action” has no owner
+### “Important user action” has no owner (A8)
 
 > “Request flows: one for each important user action…”
 
@@ -234,7 +234,7 @@ The author probably intends agent selection with author review.
 
 ## 3. Untestable requirements
 
-### U1. The Python limit has no definite threshold
+### The Python limit has no definite threshold (U1)
 
 > “The `tortoise` tool stays under about 1,500 lines of Python, not counting tests.”
 
@@ -242,7 +242,7 @@ The author probably intends agent selection with author review.
 
 **Classification:** UNCLEAR
 
-### U2. Junior-readable prose has no evaluator
+### Junior-readable prose has no evaluator (U2)
 
 > “Every named thing is described where it appears…”  
 > “Labels and arrows are plain English a junior engineer can follow.”
@@ -251,7 +251,7 @@ No target experience level, example boundary, or designated human judge is provi
 
 **Classification:** UNCLEAR
 
-### U3. Mobile and one-screen behavior lack observable thresholds
+### Mobile and one-screen behavior lack observable thresholds (U3)
 
 > “a one-screen summary”  
 > “works on a phone”
@@ -260,7 +260,7 @@ No viewport size, allowed scrolling, browser set, orientation, or overflow behav
 
 **Classification:** UNCLEAR
 
-### U4. The fuzzy diagram and planning limits are not enforceable
+### The fuzzy diagram and planning limits are not enforceable (U4)
 
 > “No diagram has more than about twelve boxes…”  
 > “The code has more than about five modules…”  
@@ -270,7 +270,7 @@ No threshold says whether 13 boxes, 6 modules, or 8 tasks crosses the boundary.
 
 **Classification:** UNCLEAR
 
-### U5. Architecture comparison has no success condition
+### Architecture comparison has no success condition (U5)
 
 > “a fresh agent compares the code with this document and updates the diagrams, or lists the gaps…”
 
@@ -278,7 +278,7 @@ The spec does not define what counts as a material mismatch, how a human confirm
 
 **Classification:** UNCLEAR
 
-### U6. Final security and QA checks have no completion criterion
+### Final security and QA checks have no completion criterion (U6)
 
 > “Test the running product and check security”
 
@@ -288,7 +288,7 @@ There is no defined supported surface, severity threshold, required output, or c
 
 ## 4. Gaps in the flow
 
-### G1. There is no Build–Gate loop
+### There is no Build–Gate loop (G1)
 
 > “| 5. Build…”  
 > “| 6. Milestone gate…”  
@@ -299,7 +299,7 @@ After the first gate, the defined linear transition reaches final checks rather 
 
 **Classification:** DEFINITELY WRONG
 
-### G2. Skipping the PRD stage removes the Ideas stage’s only named input
+### Skipping the PRD stage removes the Ideas stage’s only named input (G2)
 
 > “starting from the PRD review's answered questions”  
 > “A project with no PRD skips this stage.”
@@ -308,7 +308,7 @@ No alternate starting input is defined for a project without a PRD.
 
 **Classification:** DEFINITELY WRONG
 
-### G3. The project page has no defined source for its summary
+### The project page has no defined source for its summary (G3)
 
 > “Ideas … produces … A design note and the first decisions”  
 > “a one-screen summary: the problem, the approach, the key decisions and the current stage”
@@ -317,7 +317,7 @@ The design note has no filename or structure. Nothing says where `tortoise page`
 
 **Classification:** UNCLEAR
 
-### G4. Historical gate results have no defined persistence location
+### Historical gate results have no defined persistence location (G4)
 
 > “records pass or fail”  
 > “the milestone gates and their results”  
@@ -327,7 +327,7 @@ Only approvals are explicitly placed in the journal. There is no defined record 
 
 **Classification:** UNCLEAR
 
-### G5. Requirement coverage lacks a data contract
+### Requirement coverage lacks a data contract (G5)
 
 > “numbered requirements”  
 > “each task names its requirements”  
@@ -337,7 +337,7 @@ No requirement-ID syntax or parsing rule connects these artifacts.
 
 **Classification:** UNCLEAR
 
-### G6. “Milestone changes” have no boundary
+### “Milestone changes” have no boundary (G6)
 
 > “runs gstack `/review` on the milestone's changes and asks Codex for one review of the same changes.”
 
@@ -345,7 +345,7 @@ Nothing records a starting commit, ending commit, patch, file list, or snapshot.
 
 **Classification:** DEFINITELY WRONG
 
-### G7. Architecture synchronization is missing from the gate sequence
+### Architecture synchronization is missing from the gate sequence (G7)
 
 > “At each milestone gate a fresh agent compares the code with this document…”  
 > “`tortoise gate` runs at the end of each milestone:”  
@@ -355,7 +355,7 @@ Section 6 never invokes the fresh architecture agent or says whether it runs bef
 
 **Classification:** DEFINITELY WRONG
 
-### G8. Failure and repeat behavior is absent
+### Failure and repeat behavior is absent (G8)
 
 > “`tortoise gate` runs at the end of each milestone”  
 > “`tortoise approve` | Records the author's approval of the current stage”
@@ -364,7 +364,7 @@ The flow does not say what happens if tests fail, a reviewer fails to run, Merma
 
 **Classification:** UNCLEAR
 
-### G9. Final-check bugs have no consumer
+### Final-check bugs have no consumer (G9)
 
 > “| 7. Final checks | … | Bugs to fix | No |”
 
@@ -372,7 +372,7 @@ There is no repair step, repeat of final checks, final gate, or completion state
 
 **Classification:** DEFINITELY WRONG
 
-### G10. Review outputs are not named records
+### Review outputs are not named records (G10)
 
 > “Findings go to the author, who decides which to fix.”
 
@@ -382,7 +382,7 @@ No artifact stores either milestone review, the dispositions, or the resulting w
 
 ## 5. Hidden assumptions
 
-### H1. All named skills exist with compatible behavior
+### All named skills exist with compatible behavior (H1)
 
 > “each stage uses a skill that already exists”  
 > “`engineering:system-design`, or `feature-dev:code-architect`”  
@@ -392,7 +392,7 @@ The spec assumes installation, exact names, compatible versions, stable output f
 
 **Classification:** UNCLEAR
 
-### H2. Claude Code can invoke Codex as required
+### Claude Code can invoke Codex as required (H2)
 
 > “asks Codex for one review of the same changes.”
 
@@ -400,7 +400,7 @@ This assumes a callable Codex installation, authentication, network access, mode
 
 **Classification:** UNCLEAR
 
-### H3. Git or an equivalent history system exists
+### Git or an equivalent history system exists (H3)
 
 > “the milestone's changes”
 
@@ -408,7 +408,7 @@ Computing a milestone-specific diff assumes version control and usable boundarie
 
 **Classification:** UNCLEAR
 
-### H4. Mermaid is available in the browser
+### Mermaid is available in the browser (H4)
 
 > “Diagrams are drawn in the browser by the Mermaid library.”
 
@@ -416,7 +416,7 @@ The spec does not say whether Mermaid is vendored, loaded from a CDN, or already
 
 **Classification:** UNCLEAR
 
-### H5. Runtime versions and platforms are compatible
+### Runtime versions and platforms are compatible (H5)
 
 > “Plain Python 3, standard library only, with pytest for its own tests.”
 
@@ -424,7 +424,7 @@ No minimum Python or pytest version, supported operating system, executable inst
 
 **Classification:** UNCLEAR
 
-### H6. Third-party skills produce the required standalone documents
+### Third-party skills produce the required standalone documents (H6)
 
 > “Each document stands on its own.”  
 > “Each document ends with a glossary…”
@@ -433,7 +433,7 @@ The spec assumes office-hours, brainstorming, writing-plans, QA, CSO, and both a
 
 **Classification:** UNCLEAR
 
-### H7. The author is always available synchronously
+### The author is always available synchronously (H7)
 
 > “The author opens the page … and approves the next milestone.”  
 > “in one Claude Code session”
@@ -448,7 +448,7 @@ None found. No PRD or `PRD_REVIEW.md` was attached. `prompts/prd-review.md` is a
 
 ## 7. Risk
 
-### R1. Generated HTML may execute content from project records
+### Generated HTML may execute content from project records (R1)
 
 > “One web page built from the records by `tortoise page`…”  
 > “Diagrams are drawn in the browser by the Mermaid library.”  
@@ -460,7 +460,7 @@ If Markdown, decision text, diagram source, or review output is inserted without
 
 **Cost:** Roughly 75–150 lines plus tests; negligible time per milestone; adds contextual HTML escaping, a restrictive content policy/Mermaid configuration, and an explicit local-versus-CDN asset rule. Without it, a project record can turn a local report into code execution or data exfiltration. This does not require full sandboxed rendering.
 
-### R2. The configured test command is an unstated code-execution boundary
+### The configured test command is an unstated code-execution boundary (R2)
 
 > “Runs the project's test command, which is named once in `tortoise.json`…”
 
@@ -468,7 +468,7 @@ If repositories or configuration files are not fully trusted, this executes arbi
 
 **Classification:** UNCLEAR
 
-### R3. Initialization can overwrite existing records
+### Initialization can overwrite existing records (R3)
 
 > “`tortoise init` | Creates `docs/`, an empty decision log and `tortoise.json`…”
 
@@ -476,7 +476,7 @@ The behavior when any target already exists is missing. Overwriting can destroy 
 
 **Classification:** UNCLEAR
 
-### R4. Sole-copy records have no crash-safe write behavior
+### Sole-copy records have no crash-safe write behavior (R4)
 
 > “One file; new entries are added to the end.”  
 > “`tortoise decide` | Adds a decision log entry … or replaces an earlier one”
@@ -487,7 +487,7 @@ A crash during an in-place replacement can corrupt the only decision log or JSON
 
 **Cost:** Roughly 50–100 lines plus tests; negligible time per milestone; adds temporary-file writes, atomic replacement, and a defined refusal or backup policy. Without it, interruption during a write can lose the workflow state or decision history.
 
-### R5. Model-made decisions have no authority boundary
+### Model-made decisions have no authority boundary (R5)
 
 > “who decided (the author, or the exact model)”
 
