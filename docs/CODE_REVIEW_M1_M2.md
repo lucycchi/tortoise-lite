@@ -40,6 +40,6 @@
 
 - [tests/test_decisions.py:63](tests/test_decisions.py:63) covers missing fields, but not wrong types, malformed research objects, or newline-injected headings. Without them, malformed model output can corrupt numbering and still pass the suite. **ADDITION:** roughly 30–40 test lines; no new moving parts.
 
-- [tests/test_markdown.py:65](/tmp/claude-1000/-home/lucyc-gauntlet-openemr-base-clean/b3e321e2-ffef-4bb4-a2eb-316d5a8a0891/scratchpad/review-copy/tests/test_markdown.py:65) checks only escaped Mermaid source, not execution of the pinned runtime. It cannot detect a vulnerable Mermaid release. **ADDITION:** about 10 lines for a minimum-safe-version guard; a full browser exploit regression would require roughly 40–80 lines plus a headless-browser dependency.
+- [tests/test_markdown.py:65](tests/test_markdown.py:65) checks only escaped Mermaid source, not execution of the pinned runtime. It cannot detect a vulnerable Mermaid release. **ADDITION:** about 10 lines for a minimum-safe-version guard; a full browser exploit regression would require roughly 40–80 lines plus a headless-browser dependency.
 
 `pytest` was unavailable (`No module named pytest`), so the suite did not run. All nine Python modules parsed successfully, and the worktree remained clean.
