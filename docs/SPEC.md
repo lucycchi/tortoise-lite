@@ -49,7 +49,7 @@ The skill overrides one Superpowers default: after the spec is approved it goes 
 
 Review prompts live in the Tortoise Lite repository's `prompts/` folder. The PRD review prompt is kept word for word in `prompts/prd-review.md`, and the PRD is attached below it.
 
-The output is a ranked top five, the full findings, and clarifying questions ordered by how much each answer would change the design. The author answers the questions they can; the answers go into `PRD_REVIEW.md` and become the starting point for the ideas stage. Questions only the PM can answer are listed for the author to send. Answers that change what is built become decision log entries.
+The output is a ranked top five, the full findings, a table of the PRD's literal requirements, and clarifying questions ordered by how much each answer would change the design. The author answers the questions they can; the answers go into `PRD_REVIEW.md` and become the starting point for the ideas stage. Questions only the PM can answer are listed for the author to send. Answers that change what is built become decision log entries. Any later decision that departs from the PRD or cuts scope is checked against the requirements table first.
 
 A project with no PRD skips this stage.
 
