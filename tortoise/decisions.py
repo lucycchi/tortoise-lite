@@ -127,6 +127,12 @@ def _set_status(text: str, number: str, status: str) -> str:
     return text[:start] + entry + text[end:]
 
 
+def proposed_decisions(text: str) -> list[tuple[str, str]]:
+    """The number and question of every decision still waiting for the author, oldest first."""
+    return [(number, question) for number, question in re.findall(r"^## (D\d+): (.*)$", text, re.MULTILINE)
+            if _status(text, number) == "proposed"]
+
+
 def settled_decisions(text: str) -> list[tuple[str, str]]:
     """The question and choice of every settled decision, oldest first."""
     found = []

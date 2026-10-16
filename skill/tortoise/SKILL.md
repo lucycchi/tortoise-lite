@@ -25,6 +25,7 @@ Run every `tortoise` command from the project's root folder. Start with `"$TL/bi
 4. **Scope rule.** When a review or your own judgement suggests something new, present it with its cost (lines of code, time per milestone, new moving parts) and let the author choose. Never apply "all recommendations" to additions. Each document gets one review unless the author asks for another.
 5. **Ask in plain sentences**, one decision at a time, and say what you recommend. Name each decision or finding by what it is, with its code in parentheses.
 6. **Keep going between stages.** After a stage's work is done and any approval is recorded, run `tortoise stage next`, say in one line where the project is, and start the next stage.
+7. **Changes to the intent.** If later work shows the approved intent must change, stop and tell the author. Record the change as a decision that replaces the old one (`tortoise decide --replaces`), update `docs/DESIGN.md`, and wait for the author to settle it; settling it is their re-approval. Then bring the spec, architecture and plan in line before carrying on.
 
 ## Running Codex
 
@@ -56,6 +57,8 @@ Invoke gstack `/office-hours`. Tell it, before it starts:
 - put any bigger or "10x" ideas under Open Questions, not into the chosen approach.
 
 Ask the author to confirm the premises and choose the approach, then record the approach and other material choices as decisions.
+
+**Approve the intent.** This is the handoff from deciding what to build to building it. Check that `docs/DESIGN.md` states the problem, who it is for, how success is measured, the chosen approach and what is out of scope, and ask the author to fill any gap. Ask them to settle every proposed decision (`tortoise approve` refuses while one is open), then to approve the ideas: the approval commits the design note and decision log and tags them `tortoise/ideas`, the intent every later stage builds against.
 
 ### 2. Spec
 

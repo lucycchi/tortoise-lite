@@ -12,10 +12,11 @@ import subprocess
 import tempfile
 from pathlib import Path
 
+from tortoise.decisions import proposed_decisions
 from tortoise.plan import read_milestones
 from tortoise.project import STAGES, load_state, save_state, write_safely
 
-NEEDS_APPROVAL = {"spec", "architecture", "plan", "gate", "final-checks"}
+NEEDS_APPROVAL = {"ideas", "spec", "architecture", "plan", "gate", "final-checks"}
 ORDER = list(STAGES)
 # File names that usually hold secrets; approving never commits one of these for the first time.
 SECRET_NAMES = (".env", ".env.*", "*.pem", "*.key", "*.p12", "*.pfx", "id_rsa", "id_dsa", "id_ecdsa", "id_ed25519")
@@ -73,6 +74,13 @@ def approve(root: Path, today: str, despite_failing_tests: str | None = None) ->
         raise ValueError(f"{STAGES[stage]} does not need approval")
     if _approved(state):
         raise ValueError(f"{stage_name(state)} is already approved")
+    if stage == "ideas":
+        # Approving the ideas fixes the intent the rest of the stages build against, so no open question may remain.
+        waiting = proposed_decisions(_read(root / "docs" / "DECISIONS.md"))
+        if waiting:
+            number, question = waiting[0]
+            raise ValueError(f'"{question}" ({number}) is still proposed; settle it (tortoise decide --settle {number}) '
+                             "or replace it before approving the ideas")
     if stage == "gate":
         _check_gate(state, despite_failing_tests)
         if state["last_gate"].get("fingerprint") != code_fingerprint(root):

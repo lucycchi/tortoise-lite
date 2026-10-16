@@ -135,20 +135,21 @@ def test_stage_approve_and_gate_from_the_command_line(tmp_path):
     tortoise(tmp_path, "init", "--name", "Lab tracker", "--test-command", "echo 3 passed")
 
     shown = tortoise(tmp_path, "stage")
-    moved = [tortoise(tmp_path, "stage", "next").stdout for _ in range(2)]
+    moved = tortoise(tmp_path, "stage", "next")
     blocked = tortoise(tmp_path, "stage", "next")
     approved = tortoise(tmp_path, "approve")
 
     assert shown.stdout == "Current stage: PRD review\n"
-    assert moved == ["Now at: Ideas\n", "Now at: Spec (needs your approval before moving on)\n"]
-    assert (blocked.returncode, blocked.stderr) == (1, "tortoise: Spec needs your approval first: run tortoise approve\n")
+    assert moved.stdout == "Now at: Ideas (needs your approval before moving on)\n"
+    assert (blocked.returncode, blocked.stderr) == (1, "tortoise: Ideas needs your approval first: run tortoise approve\n")
     assert approved.stdout == (
-        "approved Spec; committed and tagged tortoise/spec\n"
+        "approved Ideas; committed and tagged tortoise/ideas\n"
         "committed: docs/DECISIONS.md, tortoise.json\n"
     )
 
-    tortoise(tmp_path, "stage", "next")
-    tortoise(tmp_path, "approve")
+    for _ in range(2):
+        tortoise(tmp_path, "stage", "next")
+        tortoise(tmp_path, "approve")
     tortoise(tmp_path, "stage", "next")
     (tmp_path / "docs" / "PLAN.md").write_text("# Plan\n\n## Milestone 1: Records\n")
     tortoise(tmp_path, "approve")

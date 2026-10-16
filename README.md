@@ -33,7 +33,7 @@ In a project folder that is a git repository, start Claude Code and say "use tor
 | Stage | What happens | You approve? |
 |---|---|---|
 | 0. PRD review | A skeptical review of the brief, with questions for you | No; you answer its questions |
-| 1. Ideas | gstack `/office-hours` explores the problem | No |
+| 1. Ideas | gstack `/office-hours` explores the problem; your approval fixes the intent the rest is built against | Yes |
 | 2. Spec | Numbered requirements (R1, R2...), then one Codex review | Yes |
 | 3. Architecture | The design, with diagrams on the project page, then one Codex review | Yes |
 | 4. Plan | Milestones of tasks, each task a checkbox naming its requirements, then one Codex review of the plan | Yes |

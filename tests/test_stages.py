@@ -4,6 +4,7 @@ import subprocess
 
 import pytest
 
+from tortoise.decisions import add_decision, settle_decision
 from tortoise.gate import run_gate
 from tortoise.project import init_project
 from tortoise.stages import advance, approve, describe
@@ -53,10 +54,27 @@ def move_to(root, stage):
 
 def test_stages_without_an_approval_move_straight_on(project):
     advance(project)
+
+    assert state(project)["stage"] == "ideas"
+    assert describe(state(project)) == "Ideas (needs your approval before moving on)"
+
+
+def test_approving_the_ideas_fixes_the_intent_once_every_decision_is_settled(project):
+    advance(project)
+    log = project / "docs" / "DECISIONS.md"
+    add_decision(log, {"question": "Which approach?", "options": ["one page", "an app"], "choice": "one page",
+                       "reason": "one user", "proposed_by": "Claude (claude-opus-5-5)"}, today="2026-10-16")
+
+    with pytest.raises(ValueError, match='"Which approach\\?" \\(D1\\) is still proposed'):
+        approve(project, today="2026-10-16")
+    assert state(project)["approvals"] == []
+    settle_decision(log, "D1")
+    approval = approve(project, today="2026-10-16")
     advance(project)
 
+    assert approval["tag"] == "tortoise/ideas"
+    assert git(project, "tag") == "tortoise/ideas"
     assert state(project)["stage"] == "spec"
-    assert describe(state(project)) == "Spec (needs your approval before moving on)"
 
 
 def test_a_stage_needing_approval_refuses_to_move_until_approved(project):
@@ -77,9 +95,9 @@ def test_approving_records_the_approval_and_commits_and_tags_the_documents(proje
 
     approve(project, today="2026-10-14")
 
-    assert state(project)["approvals"] == [{"stage": "spec", "date": "2026-10-14", "tag": "tortoise/spec"}]
+    assert state(project)["approvals"][-1] == {"stage": "spec", "date": "2026-10-14", "tag": "tortoise/spec"}
     committed = git(project, "show", "--name-only", "--format=", "tortoise/spec").split("\n")
-    assert sorted(committed) == ["docs/DECISIONS.md", "docs/SPEC.md", "tortoise.json"]
+    assert sorted(committed) == ["docs/SPEC.md", "tortoise.json"]
     assert git(project, "status", "--porcelain") == "?? notes.txt"
 
 
@@ -143,7 +161,6 @@ def test_a_gate_cannot_be_approved_before_it_has_run(project):
 def test_approving_outside_a_git_repository_is_refused_and_records_nothing(tmp_path):
     init_project(tmp_path, name="Lab tracker", test_command="true")
     advance(tmp_path)
-    advance(tmp_path)
 
     with pytest.raises(ValueError, match="must be a git repository"):
         approve(tmp_path, today="2026-10-14")
@@ -164,7 +181,7 @@ def test_a_gate_whose_tests_failed_cannot_be_approved(project):
 
     with pytest.raises(ValueError, match="tests failed at the last gate run"):
         approve(project, today="2026-10-15")
-    assert [approval["stage"] for approval in state(project)["approvals"]] == ["spec", "architecture", "plan"]
+    assert [approval["stage"] for approval in state(project)["approvals"]] == ["ideas", "spec", "architecture", "plan"]
 
 
 def test_a_passing_rerun_allows_the_approval(project):
@@ -211,7 +228,7 @@ def test_approving_refuses_to_commit_a_new_secret_file(project, name):
     with pytest.raises(ValueError, match=re.escape(name)):
         approve(project, today="2026-10-15")
     assert "tortoise/milestone-1" not in git(project, "tag")
-    assert [approval["stage"] for approval in state(project)["approvals"]] == ["spec", "architecture", "plan"]
+    assert [approval["stage"] for approval in state(project)["approvals"]] == ["ideas", "spec", "architecture", "plan"]
 
 
 def test_example_files_and_secrets_already_committed_are_allowed(project):
@@ -255,7 +272,7 @@ def test_an_existing_tag_is_refused_before_anything_changes(project):
     with pytest.raises(ValueError, match="tag tortoise/spec already exists"):
         approve(project, today="2026-10-14")
     assert git(project, "rev-parse", "HEAD") == head
-    assert state(project)["approvals"] == []
+    assert [approval["stage"] for approval in state(project)["approvals"]] == ["ideas"]
 
 
 def test_a_rejected_commit_leaves_nothing_staged_and_nothing_recorded(project):
@@ -268,7 +285,7 @@ def test_a_rejected_commit_leaves_nothing_staged_and_nothing_recorded(project):
     with pytest.raises(ValueError, match="hook says no"):
         approve(project, today="2026-10-14")
     assert git(project, "diff", "--cached", "--name-only") == ""
-    assert state(project)["approvals"] == []
+    assert [approval["stage"] for approval in state(project)["approvals"]] == ["ideas"]
 
 
 def test_a_document_approval_leaves_files_the_author_staged_alone(project):
