@@ -196,6 +196,8 @@ def test_approve_despite_failing_tests_from_the_command_line(tmp_path):
 
 def test_board_warns_and_exits_cleanly_when_github_cannot_be_reached(tmp_path):
     tortoise(tmp_path, "init", "--name", "Lab tracker", "--test-command", "pytest")
+    subprocess.run(["git", "init", "-q"], cwd=tmp_path, check=True)
+    subprocess.run(["git", "remote", "add", "origin", "git@github.com:lucy/lab-tracker.git"], cwd=tmp_path, check=True)
     (tmp_path / "docs" / "PLAN.md").write_text("# Plan\n\n## Milestone 1: Records\n\n- [ ] Task 1: store results\n")
     offline = tmp_path / "offline"
     offline.mkdir()

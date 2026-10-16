@@ -146,13 +146,13 @@ Plain Python 3, standard library only, with pytest for its own tests.
 | `tortoise gate` | Runs the milestone gate (section 6) |
 | `tortoise page` | Builds `project.html` |
 | `tortoise html` | Writes any Markdown file as a page beside it, with its diagrams drawn |
-| `tortoise board` | Copies the plan's tasks onto the project's progress board (section 7.1) |
+| `tortoise board` | Copies every task and its status onto the project's GitHub progress board (section 7.1) |
 
 The skill, `SKILL.md`, tells Claude Code which skill to run at each stage and when to call the tool.
 
-### 7.1 The progress board (optional)
+### 7.1 The progress board
 
-If the author wants one when the plan is approved, `tortoise board` creates a GitHub Project linked to the project's repository, then the author adds a board view by hand (GitHub cannot create views for a tool). Each task becomes an issue titled by what it is, such as "Chart the results (Task 3)", under a GitHub milestone named after its plan milestone; `tortoise.json` records the board and which issue is which task. Card statuses:
+When the project's repository is on GitHub, `tortoise board` tracks every task on a GitHub Project linked to it, created when the plan is approved; other projects have no board. Each task needs its own number, or the build does not start. The tool creates the Project, then the author adds a board view by hand (GitHub cannot create views for a tool). Each task becomes an issue titled by what it is, such as "Chart the results (Task 3)", under a GitHub milestone named after its plan milestone; `tortoise.json` records the board and which issue is which task. Card statuses:
 
 - **To do:** in a later milestone.
 - **In progress:** in the current milestone, not ticked.

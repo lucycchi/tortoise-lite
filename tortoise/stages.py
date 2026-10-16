@@ -51,6 +51,7 @@ def advance(root: Path) -> dict:
         milestones = read_milestones(_read(root / "docs" / "PLAN.md"))
         if not milestones:
             raise ValueError('PLAN.md has no milestones; add headings such as "## Milestone 1: Records"')
+        _check_task_numbers(milestones)
         state.update(stage="build", milestone=1, milestones=len(milestones))
     elif stage == "gate" and state["milestone"] < state["milestones"]:
         state.update(stage="build", milestone=state["milestone"] + 1)
@@ -162,6 +163,19 @@ def _record_override(gate_file: Path, reason: str) -> None:
     else:
         text = text.rstrip("\n") + "\n" + line
     write_safely(gate_file, text)
+
+
+def _check_task_numbers(milestones) -> None:
+    """Every task needs its own number, such as "Task 3: ...", so the progress board can follow each one."""
+    seen = set()
+    for milestone in milestones:
+        for _, text in milestone.tasks:
+            numbered = re.match(r"Task (\d+):", text)
+            if not numbered or numbered.group(1) in seen:
+                problem = "has no number" if not numbered else "repeats a task number"
+                raise ValueError(f'the task "{text}" in PLAN.md {problem}; write each task as "Task N: ..." '
+                                 "with its own number")
+            seen.add(numbered.group(1))
 
 
 def _approved(state: dict) -> bool:

@@ -306,3 +306,18 @@ def test_approving_final_checks_commits_the_readme_and_bug_fixes(project):
     committed = git(project, "show", "--name-only", "--format=", "tortoise/final-checks").split("\n")
     assert "README.md" in committed and "app.py" in committed
     assert git(project, "status", "--porcelain") == ""
+
+
+@pytest.mark.parametrize("plan, named", [
+    ("# Plan\n\n## Milestone 1: Records\n\n- [ ] Task 1: store results\n- [ ] tidy the styles\n", '"tidy the styles"'),
+    ("# Plan\n\n## Milestone 1: Records\n\n- [ ] Task 1: store results\n- [ ] Task 1: list results\n",
+     '"Task 1: list results"'),
+])
+def test_moving_past_the_plan_needs_every_task_to_have_its_own_number(project, plan, named):
+    move_to(project, "plan")
+    (project / "docs" / "PLAN.md").write_text(plan)
+    approve(project, today="2026-10-14")
+
+    with pytest.raises(ValueError, match=re.escape(named)):
+        advance(project)
+    assert state(project)["stage"] == "plan"

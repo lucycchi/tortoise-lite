@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 import pytest
 
@@ -75,8 +76,6 @@ class FakeGitHub:
         command = " ".join(arguments[:2])
         if self.fail_on and self.fail_on(arguments):
             raise BoardError("gh: network unreachable")
-        if command == "repo view":
-            return json.dumps({"name": "lab-tracker", "owner": {"login": "lucy"}})
         if command == "project create":
             return json.dumps({"number": 7, "id": "PVT_7", "url": "https://github.com/users/lucy/projects/7"})
         if command == "project field-list":
@@ -96,8 +95,14 @@ class FakeGitHub:
         return [call for call in self.calls if call[:len(prefix)] == list(prefix)]
 
 
+def git(root, *arguments):
+    subprocess.run(["git", *arguments], cwd=root, capture_output=True, text=True, check=True)
+
+
 @pytest.fixture
 def project(tmp_path):
+    git(tmp_path, "init", "-q", "-b", "main")
+    git(tmp_path, "remote", "add", "origin", "git@github.com:lucy/lab-tracker.git")
     init_project(tmp_path, name="Lab tracker", test_command="true")
     state = load_state(tmp_path)
     state.update(stage="build", milestone=2, milestones=3, approvals=[GATE_1_APPROVED])
@@ -168,3 +173,29 @@ def test_a_plan_without_milestones_is_refused(project):
 
     with pytest.raises(ValueError, match="no milestones"):
         sync_board(project, FakeGitHub())
+
+
+@pytest.mark.parametrize("remotes", [[], [("origin", "git@gitlab.com:lucy/lab-tracker.git")]])
+def test_without_a_github_repository_there_is_no_board_and_github_is_never_called(project, remotes):
+    git(project, "remote", "remove", "origin")
+    for name, url in remotes:
+        git(project, "remote", "add", name, url)
+    github = FakeGitHub()
+
+    messages = sync_board(project, github)
+
+    assert messages == ["no GitHub repository for this project, so no progress board"]
+    assert github.calls == []
+    assert "board" not in load_state(project)
+
+
+def test_the_board_follows_the_github_remote_even_when_another_remote_comes_first(project):
+    git(project, "remote", "remove", "origin")
+    git(project, "remote", "add", "origin", "git@gitlab.com:lucy/lab-tracker.git")
+    git(project, "remote", "add", "github", "https://github.com/lucy/lab-tracker-mirror.git")
+    github = FakeGitHub()
+
+    sync_board(project, github)
+
+    assert load_state(project)["board"]["repo"] == "lucy/lab-tracker-mirror"
+    assert all(call[2:4] == ["-R", "lucy/lab-tracker-mirror"] for call in github.made("issue"))

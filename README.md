@@ -59,7 +59,7 @@ Run each from the project's root folder.
 | `tortoise gate` | Runs the milestone gate and writes `docs/gates/milestone-N.md`. |
 | `tortoise page` | Builds `docs/project.html`, plus a page beside each record that has a diagram, such as `docs/ARCHITECTURE.html`. |
 | `tortoise html FILE.md...` | Writes each Markdown file as a page beside it (`FILE.html`) with its diagrams drawn. Works in any folder, with or without a Tortoise project. |
-| `tortoise board` | Optional. Copies the plan's tasks onto a GitHub Project board linked to the project's own repository, one issue per task, in the columns To do, In progress, Awaiting gate and Done. The plan stays the source of truth. Needs `gh auth refresh -s project` once. |
+| `tortoise board` | When the project's repository is on GitHub, copies every task and its status onto a GitHub Project board linked to the project's own repository, one issue per task, in the columns To do, In progress, Awaiting gate and Done. The plan stays the source of truth. Needs `gh auth refresh -s project` once. |
 
 ## What a project ends up with
 
